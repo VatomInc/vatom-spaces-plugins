@@ -58,22 +58,22 @@ declare module 'base-plugin-declaration' {
         onSettingsUpdated(): void
 
         /** Called on all instances when you call `this.messages.send()`. 
-         * @param msg message sent to all instances
-         * @param fromID ID of message sender
+         * @param {object} msg message sent to all instances
+         * @param {string} fromID ID of message sender
          */
         onMessage(msg, fromID): void
 
         /** Called on all instances when you call `this.messages.request()`. The first instance with a truthy return value is used as the response. 
-         * @param msg message sent to all instances
-         * @param fromID ID of message sender
+         * @param {object} msg message sent to all instances
+         * @param {string} fromID ID of message sender
          */
         onRequest(msg, fromID): void
 
         /**
          * Called when the user's position moves from the given co-ordinates
-         * @param x x co-ordinate 
-         * @param y y co-ordinate 
-         * @param z z co-ordinate 
+         * @param {number} x x co-ordinate 
+         * @param {number} y y co-ordinate 
+         * @param {number} z z co-ordinate 
          */
         onUserMoved(x, y, z): void
 
@@ -82,15 +82,15 @@ declare module 'base-plugin-declaration' {
 
         /**
          * Gets plugin configuration field
-         * @param name Name of field
+         * @param {string} name Name of field
          * @returns {any} value of configuration field attached to given name
          */
         getField(name): any
 
         /**
          * Sets plugin configuration field (only admins can successfully do this)
-         * @param name Name of field
-         * @param value Value to set field to
+         * @param {string} name Name of field
+         * @param {any} value Value to set field to
          */
         setField(name, value): void
 
@@ -108,13 +108,13 @@ declare module 'base-plugin-declaration' {
     class AppComponent {
 
         /** Constructor
-         * @param plugin reference to plugin
+         * @param {any} plugin reference to plugin
          */
         constructor(plugin)
 
         /**
         * Returns details about the plugin if it's loaded, or else returns null
-        * @param pluginID ID of plugin you are fetching details for
+        * @param {string} pluginID ID of plugin you are fetching details for
         */
         getPluginDetails(pluginID): object
 
@@ -145,7 +145,7 @@ declare module 'base-plugin-declaration' {
     class Audio {
         
         /** Constructor
-         * @param plugin reference to plugin
+         * @param {any} plugin reference to plugin
          */
         constructor(plugin)
 
@@ -182,7 +182,7 @@ declare module 'base-plugin-declaration' {
         registeredHooks: Array<any>
 
         /** Constructor
-         * @param plugin reference to plugin
+         * @param {any} plugin reference to plugin
          */
         constructor(plugin)
 
@@ -232,7 +232,7 @@ declare module 'base-plugin-declaration' {
         popups: Array<any>
 
         /** Constructor
-         * @param plugin reference to plugin
+         * @param {any} plugin reference to plugin
          */
         constructor(plugin)
 
@@ -291,12 +291,12 @@ declare module 'base-plugin-declaration' {
         unregister(id): void
 
         /** Display a popup UI. See register() for a description of the `args` parameters. 
-         * @param args popup configuration
-         * @param args.title Title of popup
-         * @param args.panel Component that is being displayed
-         * @param args.panel.iframeURL URL of iframe shown in popup
-         * @param args.panel.width Width of panel
-         * @param args.panel.height Height of panel
+         * @param {object }args popup configuration
+         * @param {string} args.title Title of popup
+         * @param {object} args.panel Component that is being displayed
+         * @param {string} args.panel.iframeURL URL of iframe shown in popup
+         * @param {number} args.panel.width Width of panel
+         * @param {number} args.panel.height Height of panel
          * 
         */
         displayPopup(args): void
@@ -387,7 +387,7 @@ declare module 'base-plugin-declaration' {
          * @param {string} properties.textColour Color of the text to show. Default is #FFFFFF.
          * @param {boolean} properties.textBold `true` to show the text as bold, `false` otherwise. Default is `false`.
          * @param {boolean} properties.textItalics `true` to show the text as italics, `false` otherwise. Default is `false`.
-         * @returns Identifier of the status item that has been created, or `null` if some issue occurred.
+         * @returns {any} Identifier of the status item that has been created, or `null` if some issue occurred.
          */
         createStatusItem(options, properties): any
 
@@ -401,7 +401,7 @@ declare module 'base-plugin-declaration' {
          * @param {number} options.width Width of the top status icon.
          * @param {number} options.height Height of the top status icon.
          * @param {object} properties Properties of the top status icon to create.
-         * @returns Identifier of the top status icon that has been created, or `null` if some issue occurred.
+         * @returns {any} Identifier of the top status icon that has been created, or `null` if some issue occurred.
          */
         createTopStatusIcon(options, properties): any
 
@@ -553,7 +553,7 @@ declare module 'base-plugin-declaration' {
         toggleFollow(objectID): void
 
         /** Registers the specified animations with the system 
-         * @param url URL of animations that you wish to register
+         * @param {string} url URL of animations that you wish to register
          */
         registerAnimations(url): void
 
@@ -655,19 +655,19 @@ declare module 'base-plugin-declaration' {
          * Get single user property.
          * @param {string} userID The user's ID. Leave blank for the current user.
          * @param {string} propertyName The name of the property to fetch. Prefix it with 'space:' to store for this space only.
-         * @returns Property value, or `null` if something went wrong.
+         * @returns {any} Property value, or `null` if something went wrong.
          */
         getProperty(userID , propertyName): any
 
          /**
          * Get user properties specific to this plugin.
          * @param {string} userID Identifier of the user to get properties from. Leave blank for the current user.
-         * @returns Properties for the given user, or `null` if something went wrong.
+         * @returns {any} Properties for the given user, or `null` if something went wrong.
          */
         getProperties(userID): object
 
         /** Set user properties specific to this plugin 
-         * @param props Properties you wish to set
+         * @param {object} props Properties you wish to set
         */
         setProperties(props): void
 
@@ -683,12 +683,12 @@ declare module 'base-plugin-declaration' {
          * - `avatar.modelURL`: 3D model of avatar (Mandatory)
          * - `avatar.properties`: object containing all avatar properties (Optional)
          * 
-         * @param avatar Avatar information used to register new avatar
+         * @param {object} avatar Avatar information used to register new avatar
         */
         registerAvatar(avatar): void
 
         /** Remove a registered avatar 
-         * @param id Identifier of avatar you wish to remove
+         * @param {string} id Identifier of avatar you wish to remove
         */
         unregisterAvatar(id): void
 
@@ -696,7 +696,7 @@ declare module 'base-plugin-declaration' {
         getAvatarData(): any
 
         /** Asks the user to immediately switch to the specified avatar data. Returns false if the user denied the change request.
-         * @param avatar Avatar object you wish to set new data for
+         * @param {object} avatar Avatar object you wish to set new data for
          */
         setAvatarData(avatar): void
 
@@ -742,10 +742,10 @@ declare module 'base-plugin-declaration' {
         queryAllowlPermission(query): object
 
         /** Show a shut down screen for user 
-         * @param message Message you wish to display on the shut down screen
-         * @param title Title you wish to display on the shut down screen
-         * @param buttonText Text of the button shown on the shut down screen. Default is "Try again"
-         * @param buttonAction Action you wish the shut down screen button to take when clicked. Default is `e => location.reload()` which refreshes the page.
+         * @param {string} message Message you wish to display on the shut down screen
+         * @param {string} title Title you wish to display on the shut down screen
+         * @param {string} buttonText Text of the button shown on the shut down screen. Default is "Try again"
+         * @param {function} buttonAction Action you wish the shut down screen button to take when clicked. Default is `e => location.reload()` which refreshes the page.
          */
         showShutDownScreen(message, title, buttonText, buttonAction): void
 
@@ -753,8 +753,8 @@ declare module 'base-plugin-declaration' {
         showAvatarSelectPopup(): void
 
         /** Send a generic analytics event 
-         * @param name Name of the event
-         * @param value Value associated with given name
+         * @param {string} name Name of the event
+         * @param {any} value Value associated with given name
         */
         sendAnalytics(name, value): void
 
@@ -887,9 +887,9 @@ declare module 'base-component-declaration' {
         setFields(fields): void
 
         /** Send a message to all instances of this component on other devices.
-         * @param msg The message to send.
-         * @param isGlobal If true, will send to everyone on the server instead of just everyone within rendering range.
-         * @param targetUserID If specified, sends a message to a specific user, independent of where that user is.
+         * @param {object} msg The message to send.
+         * @param {boolean} isGlobal If true, will send to everyone on the server instead of just everyone within rendering range.
+         * @param {string} targetUserID If specified, sends a message to a specific user, independent of where that user is.
          */
         sendMessage(msg, isGlobal, targetUserID): void
 
@@ -901,7 +901,7 @@ declare module 'base-component-declaration' {
          * @param {string} targetUserID If specified, sends a message to a specific user, independent of where that user is.
          * @returns {Promise<*>} The response.
          */
-        request(msg, isGlobal, targetUserID): Promise<any>
+        sendRequest(msg, isGlobal, targetUserID): Promise<any>
 
     }
 
