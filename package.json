@@ -1,0 +1,23 @@
+{
+  "name": "vatom-spaces-external-plugin-declarations",
+  "version": "1.0.0",
+  "description": "Provides declarations for classes, functions and variables that external vatom plugins have access to",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VatomInc/external-plugin-declaration.git"
+  },
+  "keywords": [
+    "declaration",
+    "intellisense"
+  ],
+  "author": "Liron Toledo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VatomInc/external-plugin-declaration/issues"
+  },
+  "homepage": "https://github.com/VatomInc/external-plugin-declaration#readme"
+}
