@@ -46,7 +46,7 @@ declare module 'base-plugin-declaration' {
         storage: StorageComponent
 
         /** Constructor */
-        constructor();
+        constructor()
         
         /** Called on plugin load */
         onLoad(): void
@@ -88,7 +88,7 @@ declare module 'base-plugin-declaration' {
         getField(name): any
 
         /**
-         * Sets plugin configuration field
+         * Sets plugin configuration field (only admins can successfully do this)
          * @param name Name of field
          * @param value Value to set field to
          */
@@ -828,9 +828,83 @@ declare module 'base-plugin-declaration' {
 
 declare module 'base-component-declaration' {
     class BaseComponent {
-        constructor();
-        onLoad(): void;
+
+        /** Reference to plugin */
+        plugin: any
+
+        /** ID of this component */
+        componentID: string
+
+        /** ID of the object this component is associated with */
+        objectID: string
+
+        /** The map item that this component is attached to. */
+        mapItem: any
+
+        /** Current object fields */
+        fields: object
+
+        /** Constructor */
+        constructor()
+
+        /** Called when the object is loaded */
+        onLoad(): void
+
+        /** Called when the object is removed or component is uninstalled */
+        onUnload(): void
+
+        /** Called when the object's fields changed 
+          * @param newFields updated fields
+         */
+        onObjectUpdated(newFields): void
+
+        /**
+         * Called when the user clicks on the object.
+         * @param {object} event An object describing the event
+         * @param {THREE.Vector3} event.position The x, y and z coordinates of the click hit point in world space
+         * @param {THREE.Vector2} event.uv The X and Y values on the UV that was hit. This can be used to calculate where on a plane or shape the click happened, eg `x = uv.x * screenWidth`
+         */
+        onClick(event): void
+
+        /**
+         * Gets component configuration field
+         * @param {string} name Name of field
+         * @returns {any} value of configuration field attached to given name
+         */
+        getField(name): any
+
+        /**
+         * Sets component configuration field (only admins can successfully do this)
+         * @param {string} name Name of field
+         * @param {any} value Value to set field to
+         */
+        setField(name, value): void
+
+        /**
+         * Sets multiple fields at once (only admins can successfully do this)
+         * @param {object} fields Fields to set
+         */
+        setFields(fields): void
+
+        /** Send a message to all instances of this component on other devices.
+         * @param msg The message to send.
+         * @param isGlobal If true, will send to everyone on the server instead of just everyone within rendering range.
+         * @param targetUserID If specified, sends a message to a specific user, independent of where that user is.
+         */
+        sendMessage(msg, isGlobal, targetUserID): void
+
+        /**
+         * Send a message to all instances of this component, The first truthy response from onRequest(msg) will be returned.
+         * 
+         * @param {object} msg The message to send.
+         * @param {bool} isGlobal If true, will send to everyone on the entire server instead of just everyone within rendering range.
+         * @param {string} targetUserID If specified, sends a message to a specific user, independent of where that user is.
+         * @returns {Promise<*>} The response.
+         */
+        request(msg, isGlobal, targetUserID): Promise<any>
+
     }
+
     namespace BaseComponent {}
     export = BaseComponent;
 }
