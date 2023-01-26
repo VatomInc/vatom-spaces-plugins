@@ -827,6 +827,10 @@ declare module 'base-plugin-declaration' {
 }
 
 declare module 'base-component-declaration' {
+    
+    /**
+    * Represents a plugin component that is attached to an object.
+    */
     class BaseComponent {
 
         /** Reference to plugin */
