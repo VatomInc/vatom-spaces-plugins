@@ -82,17 +82,17 @@ declare module 'base-plugin-declaration' {
 
         /**
          * Gets plugin configuration field
-         * @param {string} name Name of field
+         * @param {string} id ID of field
          * @returns {any} value of configuration field attached to given name
          */
-        getField(name): any
+        getField(id): any
 
         /**
          * Sets plugin configuration field (only admins can successfully do this)
-         * @param {string} name Name of field
+         * @param {string} id ID of field
          * @param {any} value Value to set field to
          */
-        setField(name, value): void
+        setField(id, value): void
 
         /**
          * Gets the component field for a given object.
@@ -872,17 +872,17 @@ declare module 'base-component-declaration' {
 
         /**
          * Gets component configuration field
-         * @param {string} name Name of field
+         * @param {string} id ID of field
          * @returns {any} value of configuration field attached to given name
          */
-        getField(name): any
+        getField(id): any
 
         /**
          * Sets component configuration field (only admins can successfully do this)
-         * @param {string} name Name of field
+         * @param {string} id ID of field
          * @param {any} value Value to set field to
          */
-        setField(name, value): void
+        setField(id, value): void
 
         /**
          * Sets multiple fields at once (only admins can successfully do this)

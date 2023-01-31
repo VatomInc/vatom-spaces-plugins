@@ -1,6 +1,6 @@
 {
   "name": "vatom-spaces-external-plugin-declarations",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Provides declarations for classes, functions and variables that external vatom plugins have access to",
   "types": "./index.d.ts",
   "scripts": {
