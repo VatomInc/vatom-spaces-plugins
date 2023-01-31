@@ -1,8 +1,7 @@
 {
   "name": "vatom-spaces-external-plugin-declarations",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Provides declarations for classes, functions and variables that external vatom plugins have access to",
-  "main": "./index.js",
   "types": "./index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
