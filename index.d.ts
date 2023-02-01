@@ -1,4 +1,4 @@
-declare module 'base-plugin-declaration' {
+declare module 'vatom-spaces-external-plugin-declarations' {
     
     /** Base plugin class. All plugins should extend this class. */
     class BasePlugin {
@@ -820,16 +820,8 @@ declare module 'base-plugin-declaration' {
         getURL(bucket, path): Promise<string>
     }
 
-
-    namespace BasePlugin {}
-    export = BasePlugin;
-
-}
-
-declare module 'base-component-declaration' {
-    
-    /** Represents a plugin component that is attached to an object. */
-    class BaseComponent {
+     /** Represents a plugin component that is attached to an object. */
+     class BaseComponent {
 
         /** Reference to plugin */
         plugin: any
@@ -907,6 +899,6 @@ declare module 'base-component-declaration' {
 
     }
 
-    namespace BaseComponent {}
-    export = BaseComponent;
+    export = {BasePlugin, BaseComponent}
+
 }
