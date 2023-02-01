@@ -1,4 +1,4 @@
-declare module 'vatom-spaces-external-plugin-declarations' {
+declare module 'vatom-spaces-plugins' {
     
     /** Base plugin class. All plugins should extend this class. */
     class BasePlugin {
