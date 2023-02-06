@@ -3,15 +3,15 @@ declare module 'vatom-spaces-plugins' {
     /** Base plugin class. All plugins should extend this class. */
     class BasePlugin {
 
-        /** Plugin ID */
+        /** Identifier for this plugin */
         id: string
-        /** Plugin name */
+        /** Name of this plugin */
         name: string
-        /** Plugin description */
+        /** Description of this plugin */
         description: string
-        /** Plugin business ID */
+        /** Identifier of the business that this plugin belongs to */
         business_id: string
-        /** Plugin version number */
+        /** Current version of this plugin */
         version: number
 
         /** React component for the settings panel of this plugin */
@@ -45,9 +45,6 @@ declare module 'vatom-spaces-plugins' {
         /** Handles interaction with the storage system */
         storage: StorageComponent
 
-        /** Constructor */
-        constructor()
-        
         /** Called on plugin load */
         onLoad(): void
 
@@ -107,11 +104,6 @@ declare module 'vatom-spaces-plugins' {
     /** Handles interaction with the main app */
     class AppComponent {
 
-        /** Constructor
-         * @param {any} plugin reference to plugin
-         */
-        constructor(plugin)
-
         /**
         * Returns details about the plugin if it's loaded, or else returns null
         * @param {string} pluginID ID of plugin you are fetching details for
@@ -144,11 +136,6 @@ declare module 'vatom-spaces-plugins' {
     /** Handles interaction with the audio system */
     class Audio {
         
-        /** Constructor
-         * @param {any} plugin reference to plugin
-         */
-        constructor(plugin)
-
         /**
          * Preload a sound effect so it can be played immediately.
          * @param {string} url The sound URL
@@ -180,11 +167,6 @@ declare module 'vatom-spaces-plugins' {
 
         /** Array of all registered hooks */
         registeredHooks: Array<any>
-
-        /** Constructor
-         * @param {any} plugin reference to plugin
-         */
-        constructor(plugin)
 
         /** 
          * Register a hook 
@@ -230,11 +212,6 @@ declare module 'vatom-spaces-plugins' {
 
         /** List of active popup windows */
         popups: Array<any>
-
-        /** Constructor
-         * @param {any} plugin reference to plugin
-         */
-        constructor(plugin)
 
         /**
          * Registers a new menu item.
@@ -304,10 +281,6 @@ declare module 'vatom-spaces-plugins' {
 
     /** Handles communication between different instances of the plugin */
     class Messages {
-        /** Constructor
-         * @param plugin reference to plugin
-         */
-        constructor(plugin)
 
         /**
          * Send a message to all instances of your plugin. The message will be received in the onMessage function.
@@ -345,11 +318,6 @@ declare module 'vatom-spaces-plugins' {
 
         /** Active component instances */
         componentInstances: Array<any>
-
-        /** Constructor
-         * @param plugin reference to plugin
-         */
-        constructor(plugin)
 
         /** Gets all objects */
         all(): Array<any>
@@ -568,11 +536,6 @@ declare module 'vatom-spaces-plugins' {
         /** Stored textures */
         stored: {}
 
-        /** Constructor
-         * @param plugin reference to plugin
-         */
-        constructor(plugin)
-
         /** 
          * Create a new texture. Returns an OffscreenCanvas which can be drawn to. The OffscreenCanvas has an `id` property which can be used as the `url` of an object.
          * 
@@ -598,13 +561,8 @@ declare module 'vatom-spaces-plugins' {
     /** Handles the management of the user's position and appearance */
     class User {
 
-         /** List of registered avatars */
+        /** List of registered avatars */
         registeredAvatars: Array<any>
-
-        /** Constructor
-         * @param plugin reference to plugin
-         */
-        constructor(plugin)
 
         /** @returns Position of the current user */
         getPosition(): object
@@ -632,6 +590,20 @@ declare module 'vatom-spaces-plugins' {
          * @param {boolean} deg `true` to indicate that the given rotation is in degrees, `false` to indicate that it is in radians. Default is `false`.
          */
         setRotation(r, deg): void
+
+        /**
+         * Gets the orientation of the current user.
+         * @param deg `true` to return the orientation in degrees, `false` to return in radians. Default is `false`.
+         * @returns Orientation of the current user.
+         */
+        getOrientation(deg: boolean = false): number
+
+        /**
+         * Sets the orientation of the current user.
+         * @param o Orientation to set for the current user.
+         * @param deg `true` to indicate that the given orientation is in degrees, `false` to indicate that it is in radians. Default is `false`.
+         */
+        setOrientation(o: number, deg: boolean = false): void
 
         /** Identifier of the current user */
         getID(): string
@@ -763,11 +735,6 @@ declare module 'vatom-spaces-plugins' {
     /** Handles interaction with the world */
     class World {
         
-        /** Constructor
-         * @param plugin reference to plugin
-         */
-        constructor(plugin)
-        
         /** @returns {string} Full world ID */
         getID(): string
 
@@ -799,11 +766,6 @@ declare module 'vatom-spaces-plugins' {
     /** Handles interaction with the storage system */
     class StorageComponent {
         
-        /** Constructor
-         * @param plugin reference to plugin
-         */
-        constructor(plugin)
-
         /** Put a file into storage and return the URL to the item 
          * @param {string} bucket Storage bucket to put item in. Options: `space`, `server`, `user`.
          * @param {string} path Path of where in the bucket you wish to store the item
@@ -837,9 +799,6 @@ declare module 'vatom-spaces-plugins' {
 
         /** Current object fields */
         fields: object
-
-        /** Constructor */
-        constructor()
 
         /** Called when the object is loaded */
         onLoad(): void
@@ -899,6 +858,6 @@ declare module 'vatom-spaces-plugins' {
 
     }
 
-    export = {BasePlugin, BaseComponent}
+    export = { BasePlugin, BaseComponent }
 
 }
