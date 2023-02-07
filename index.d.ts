@@ -1,11 +1,37 @@
 declare module 'vatom-spaces-plugins' {
 
+    /** 2D vector */
+    interface Vector2 {
+        x: number,
+        y: number
+    }
+
+    /** 3D vector */
+    interface Vector3 {
+        x: number,
+        y: number,
+        z: number
+    }
+
+    /** Quaternion */
+    interface Quaternion {
+        x: number,
+        y: number,
+        z: number,
+        w: number,
+    }
+
     /** Details about a plugin */
     interface PluginDetails {
+        /** Identifier of the plugin */
         id: string,
+        /** Name of the plugin */
         name: string,
+        /** Description of the plugin */
         description: string,
+        /** Identifier of the business that created the plugin */
         business_id: string,
+        /** Version of the plugin */
         version: number
     }
 
@@ -18,9 +44,9 @@ declare module 'vatom-spaces-plugins' {
         /** Identifier of the object given when the request started. */
         objectID: string,
         /** World co-ordinates of the hit point (only if an object identifier was given). */
-        point?: { x: number, y: number, z: number },
+        point?: Vector3,
         /** UV co-ordinates of the hit point (only if an object identifier was given). Useful for interacting with 2D content on a 3D plane. */
-        uv?: { x: number, y: number }
+        uv?: Vector2
     }
 
     /** Options relating to playback of audio */
@@ -45,12 +71,178 @@ declare module 'vatom-spaces-plugins' {
         callback: HookCallback
     }
 
+    /** Represents a panel that can be attached to a menu item. */
+    interface MenuPanel {
+        /** URL to display in this panel as an iframe. Cannot use in conjunction with `component`. */
+        iframeURL?: string,
+        /** A React component to display. The component will receive the following props: `plugin`, `onClose`. Cannot use in conjunction with `iframeURL`. */
+        component?: any,
+        /** Width of the panel. Default is 320 pixels. */
+        width?: number,
+        /** Maximum height (in pixels) that the panel should be. Defaults to the height of the content inside. */
+        maxHeight?: number
+    }
+
+    /** Represents a menu item that can be registered */
+    interface MenuItem {
+        /** Identifier of the menu item. */
+        id: string,
+        /** URL to the icon for the menu. */
+        icon: string,
+        /** Text to display under the icon. */
+        text: string,
+        /** Location of the menu item. */
+        section: "controls" | "usermenu" | "infopanel" | "overlay-top" | "plugin-settings" | "start-screen" | "file-menu" | "insert-object" | "admin-panel",
+        /** Title of the icon. */
+        title: string,
+        /** Color that will be used for both the icon and the text. */
+        color: string,
+        /** Color that will be used for just the text. Defaults to `color` if not given. */
+        textColor?: string,
+        /** Sorting order for this item, ranging from 0 (on the left) to infinity (on the right). Default is 0. */
+        order?: number,
+        /** `true` when the menu item should stay either on or off (e.g: mute/unmute or avatar video), `false` otherwise. Default is `false`. */
+        persistent?: boolean,
+        /** `true` to use the actual icon provided (instead of changing icon color), `false` to change icon color based on `color` field. Default is `false`. */
+        useRawIcon?: boolean,
+        /** `true` to hide the menu item from non-admins, `false` to show the menu item to non-admins. Default is `false`. */
+        adminOnly?: boolean,
+        /** If `true` and section == 'usermenu', the menu icon appears on the current user's options. Default is `false`. */
+        currentUser?: boolean,
+        /** If `false` and section == 'usermenu', the menu icon does not appear on other user's options. Default is `true`. */
+        otherUsers?: boolean,
+        /** Number to show as a notification badge on the menu item. Does not display a badge for values <= 0. */
+        badgeCount?: number,
+        /** Called when the menu button is pressed. */
+        action?: (evt: { id: string, name: string, profileURL: string }) => void,
+        /** Panel that will be displayed when this menu item is clicked. */
+        panel: MenuPanel
+    }
+
+    /** Item to show as a popup. */
+    interface PopupItem {
+        /** Title of the popup. */
+        title: string,
+        /** Panel that should be displayed. */
+        panel: MenuPanel
+    }
+
+    /** Options relating to the user status bar */
+    interface StatusOptions {
+        /** Identifier of the user you would like to create this item for. Default is your own user ID. */
+        userID: string,
+        /** Order in which to display this top status icon. */
+        order: number,
+        /** Size of the top status icon. */
+        size: number,
+        /** Width of the top status icon. */
+        width: number,
+        /** Height of the top status icon. */
+        height: number
+    }
+
+    /** Options relating to the animation of an object */
+    interface AnimateOptions {
+        /** Identifer of the object to animate. */
+        target: string,
+        /** Final properties of the object after the animation finishes. Cannot be used in conjunction with `field`. */
+        final: MapItemProperties,
+        /** Field to animate. Cannot be used in conjunction with `final`. */
+        field: "position.x" | "position.y" | "position.z" | "scale" | "opacity",
+        /** Final value to animate to. */
+        value: any,
+        /** Number of milliseconds to show the animation for. */
+        duration: number,
+        /** Number of milliseconds to wait before starting the animation. */
+        delay: number,
+        /** `true` to save the final state (after the animation completes) to the database, `false` otherwise. */
+        save: boolean
+    }
+
+    /** Instance for a component */
+    interface ComponentInstance {
+        /** Reference to the plugin that registered this component. */
+        plugin: BasePlugin
+        /** Identifier of this component instance. */
+        componentID: string,
+        /** Identifier of the object that this component is attached to. */
+        objectID: string,
+        /** Properties for the object that this component is attached to. */
+        fields: MapItemProperties
+    }
+
+    /** Settings for a component */
+    interface ComponentSettings {
+        /** Identifier of this setting. */
+        id: string,
+        /** Name of this setting. */
+        name: string,
+        /** Type of this setting. */
+        type: "label" | "section" | "collapse-section" | "select" | "select-item" | "file" | "color" | "checkbox" | "button" | "field-button" | "half-button" | "number" | "text" | "slider" | "vector2" | "vector3" | "textarea",
+        /** Value of the setting. Do not specify if users should be able to change the value. */
+        value: any,
+        /** Description of what the setting does. */
+        help: string,
+        /** When the type is `"select"`, this represents the list of values in the dropdown. */
+        values?: any[],
+        /** When the type is `"select"`, `"color"`, `"checkbox"`, `"number"`, `"text"`, `"slider"` or `"textarea"`, this represents the default value to use when no value already exists. */
+        default?: any,
+        /** When the type is `"slider"`, this represents the minimum value. Default is 0. */
+        min?: number,
+        /** When the type is `"slider"`, this represents the maximum value. Default is 1. */
+        max?: number,
+        /** When the type is `"slider"`, `true` shows the value as a percentage (i.e. multiplies the value by 100), whereas `false` will show the raw value. Default is `false`. */
+        percent?: boolean,
+        /** When the type is `"slider"`, `true` fills the slider up to the current value (useful for volume slider), whereas `false` does not fill the slider. Default is `false`. */
+        fill?: boolean,
+        /** When the type is `"slider"`, `true` shows the current value, `false` otherwise. Default is `false`. */
+        showValue?: boolean,
+        /** When the type is `"slider"`, this represents the number of decimal places to use for the value. Default is 0. */
+        precision?: number
+    }
+
+    /** Information regarding a component */
+    interface ComponentInfo {
+        /** Identifier of this component. */
+        id: string,
+        /** Name of this component. */
+        name: string,
+        /** Description of this component. */
+        description: string,
+        /** Settings that can be changed by users. */
+        settings: ComponentSettings[] | ((item: MapItemProperties) => ComponentSettings[]),
+        /** List of item types that this component can be attached to. */
+        only?: string[],
+    }
+
     /** Options used when creating a texture */
     interface TextureOptions {
         /** Width of the texture. Should be a power of 2. */
         width: number,
         /** Height of the texture. Should be a power of 2. */
         height: number
+    }
+
+    /** Properties for a map item */
+    interface MapItemProperties {
+        /** Identifier of this item. */
+        id: string,
+        /** Type of this item. */
+        type: string,
+        /** Position in the x axis. */
+        x: number,
+        /** Position in the y axis. */
+        height: number,
+        /** Position in the z axis. */
+        y: number,
+        /** `true` if this item is not allowed to be edited, `false` otherwise. */
+        locked: boolean,
+        /** `true` if this item has a click interaction, `false` otherwise. */
+        targetable: boolean,
+        /** `true` if this item has collision enabled, `false` otherwise. */
+        collide: boolean,
+        /** `true` if this item only exists locally and not saved in the database, `false` if it exists in the database. */
+        clientOnly: boolean
     }
 
     /** Represents a map item that can be found in the space */
@@ -60,7 +252,7 @@ declare module 'vatom-spaces-plugins' {
         /** `true` if this item is an avatar, `false` otherwise. */
         isAvatar: boolean,
         /** Properties for this item. */
-        properties: { id: string, type: string, x: number, height: number, y: number, locked: boolean, targetable: boolean, collide: boolean },
+        properties: MapItemProperties,
         /**
          * Updates the properties of this object.
          * @param props Properties that should be updated.
@@ -129,7 +321,7 @@ declare module 'vatom-spaces-plugins' {
         /** Amount of times to play the animation for, or `true` to loop forever. Default is 1. */
         loop?: number | boolean,
         /** Locks the avatar into moving at this fixed speed per second (user won't be able to move their avatar while the animation is running). Specify `{ x: 0, y: 0, z: 0 }` to lock the avatar in place. */
-        fixed_movement?: { x: number, y: number, z: number },
+        fixed_movement?: Vector3,
         /** Can be `"smooth"` (default) to wait for the animation cycle to complete, `"immediate"` to cancel the animation immediately when the user moves, or `"none"` to not allow the user to cancel movement. */
         cancel_mode?: "smooth" | "immediate" | "none",
         /** `true` to merge the animation with the default animations for walk, run etc. */
@@ -138,19 +330,22 @@ declare module 'vatom-spaces-plugins' {
 
     /** Represents a hit from a raycast */
     interface RaycastHit {
+        /** Item that has been hit. */
         mapItem: MapItem,
+        /** Distance between the current user and the object that has been hit. */
         distance: number,
-        point?: { x: number, y: number, z: number },
+        /** Point of intersection (in world co-ordinates) */
+        point?: Vector3
     }
 
     /** Options relating to performing a raycast */
     interface RaycastOptions {
         /** Point, with values between 0 and 1, determing the co-ordinate on the screen. Use `{ x: 0.5, y: 0.5 }` to pick from the center of the screen. */
-        screenPosition: { x: number, y: number },
+        screenPosition: Vector2,
         /** Start of the ray in 3D space. */
-        worldPosition: { x: number, y: number, z: number },
+        worldPosition: Vector3,
         /** Direction of the ray. Ignored if `screenPosition` is given. */
-        worldDirection: { x: number, y: number, z: number },
+        worldDirection: Vector3,
         /** Length of the ray. Default is infinity. */
         length: number,
         /** `true` to only hit items with `collide === true` set, `false` to hit all items. */
@@ -160,9 +355,9 @@ declare module 'vatom-spaces-plugins' {
     /** Event that contains information from a component being clicked */
     interface ComponentClickEvent {
         /** Point at which the click hit, in world space. */
-        position: { x: number, y: number, z: number },
+        position: Vector3,
         /** Position on the UV that was hit. Can be used to calculate where on a shape the click happened (e.g.: `let x = uv.x * screenWidth`) */
-        uv: { x: number, y: number }
+        uv: Vector2
     }
 
     /** Callback function for an input capture event */
@@ -346,9 +541,6 @@ declare module 'vatom-spaces-plugins' {
     /** Handles the registering and invoking of hooks, which are overridable global events. */
     class HooksComponent {
 
-        /** Array of all registered hooks */
-        registeredHooks: Hook[]
-
         /**
          * Registers a hook event handler.
          * @param name Name of the hook.
@@ -387,68 +579,29 @@ declare module 'vatom-spaces-plugins' {
 
         /**
          * Registers a new menu item.
-         *
-         * Available `section` parameters are:
-         * - `"controls"` : Displays the menu item in the bottom control bar. If a panel is specified, it will open in the accordion.
-         * - `"usermenu"` : Displays the menu item as an action in the panel that appears when clicking on a user. Properties `currentUser` and `otherUsers` use this section.
-         * - `"infopanel"` : Displays the panel permanently as a transparent overlay in the top-right. Good place for information such as tasks to complete, etc.
-         * - `"overlay-top"` : Displays the panel permanently as a transparent overlay along the top of the app. This obstructs user controls, so it should only be used for short alerts before being removed.
-         * - `"plugin-settings"` : Displays the panel when a user clicks the "Settings" button next to a plugin. Only one of this type should be registered per plugin. Only accessible to admin users.
-         * - `"start-screen"` : Adds this panel as an option under File > Settings > Welcome Screen. The selected screen can be displayed instead of the normal start screen. Only accessible to admin users.
-         * - `"file-menu"` : Displays the menu item under the File dropdown in the top admin menu bar. Only accessible to admin users.
-         * - `"insert-object"` : Displays an item in the Insert menu.
-         * - `"admin-panel"` : Displays the menu item in the container shown when clicking the "Admin" button in the bottom menu bar. Only accessible to admin users.
-         * - `"bottom-accordion"` : Displays a panel that will permanently appear at the bottom of the accordion.
-         *
-         * @param {object} args Menu configuration
-         * @param {string} args.id Identifier of the menu item.
-         * @param {string} args.icon URL to the icon for the menu.
-         * @param {string} args.text Text to display under the icon. Default is 'Text'.
-         * @param {string} args.section Location of the menu item. Default is 'controls'.
-         * @param {string} args.title Title of the icon.
-         * @param {string} args.color Color that will be used for both the icon and the text.
-         * @param {string} args.textColor Color that will be used for just the text. Defaults to `color` if not given.
-         * @param {number} args.order Sorting order for this item. Default is 0.
-         * @param {boolean} args.persistent `true` when the menu item should stay either on or off (e.g: mute/unmute or avatar video), `false` otherwise. Default is `false`.
-         * @param {boolean} args.useRawIcon `true` to use the actual icon provided (instead of changing icon color), `false` to change icon color based on `color` field. Default is `false`.
-         * @param {boolean} args.adminOnly `true` to hide the menu item from non-admins, `false` to show the menu item to non-admins. Default is `false`.
-         * @param {boolean} args.currentUser If specified, and section == 'usermenu', the menu icon appears on the current user's menu bar
-         * @param {boolean} args.otherUsers Default = "true". If false, and section == 'usermenu', the menu icon does not appear on other user's menu bar
-         * @param {number} args.badgeCount Number to show as a notification badge on the menu item. Does not display a badge for values <= 0.
-         * @param {Function} args.action If specified, this function will be called when the button is pressed.
-         * @param {object} args.panel If specified, a panel will be displayed when this menu item is clicked.
-         * @param {Component} args.panel.iframeURL The URL to display in the panel's iframe.
-         * @param {Component} args.panel.component A React component to display. The component will receive these props: `plugin`, `onClose`
-         * @param {boolean} args.panel.alwaysRender If true, the panel is always running and just made hidden when not opened.
-         * @param {number} args.panel.width The width of the panel. Default = 320.
-         * @param {number} args.panel.maxHeight Maximum height (in pixels) that the panel should be. Defaults to the height of the content inside.
-         * @returns {string} Identifier for the menu item.
+         * @param options Menu options.
+         * @returns Identifier for the menu item.
          */
-        register(args): string
+        register(options: MenuItem): string
 
         /**
          * Updates the fields for the given menu item.
-         * @param {string} id Identifier of the menu item to update.
-         * @param {object} changes Changes to make to the menu item.
+         * @param id Identifier of the menu item to update.
+         * @param changes Changes to make to the menu item.
          */
-        update(id, changes): void
+        update(id: string, changes: MenuItem): void
 
         /**
          * Unregisters an existing menu item.
-         * @param {string} id Identifier for the menu item to unregister.
+         * @param id Identifier for the menu item to unregister.
          */
-        unregister(id): void
+        unregister(id: string): void
 
-        /** Display a popup UI. See register() for a description of the `args` parameters.
-         * @param {object }args popup configuration
-         * @param {string} args.title Title of popup
-         * @param {object} args.panel Component that is being displayed
-         * @param {string} args.panel.iframeURL URL of iframe shown in popup
-         * @param {number} args.panel.width Width of panel
-         * @param {number} args.panel.height Height of panel
-         *
-        */
-        displayPopup(args): void
+        /**
+         * Displays a popup.
+         * @param options Popup configuration options.
+         */
+        displayPopup(options: PopupItem): void
 
     }
 
@@ -483,218 +636,165 @@ declare module 'vatom-spaces-plugins' {
     /** Handles the creation and manipulation of objects in the space */
     class Objects {
 
-        /** All registered components for this plugin */
-        components: Array<any>
-
-        /** Active component instances */
-        componentInstances: Array<any>
-
-        /** Gets all objects */
-        all(): Array<any>
-
         /**
          * Creates a new object. Will be created as a client-only object, unless
-         * `clientOnly: false` is specified.
-         * @param {object} options Options relating to the object to create.
-         * @param {number} options.x X co-ordinate to place the object.
-         * @param {number} options.height Y co-ordinate to place the object.
-         * @param {number} options.y Z co-ordinate to place the object.
-         * @param {boolean} options.clientOnly `true` to only create this object for yourself, `false` to create for everyone in the space. Default is `true`.
-         * @param {object} options.position Position to place the object.
-         * @param {number} options.position.x X co-ordinate to place the object.
-         * @param {number} options.position.y Y co-ordinate to place the object.
-         * @param {number} options.position.z Z co-ordinate to place the object.
-         * @returns {string} Identifier of the object that has been created.
+         * `clientOnly: false` is specified in the options.
+         * @param options Options relating to the object to create.
+         * @returns Identifier of the object that has been created.
          */
-        create(options): string
+        create(options: MapItemProperties): string
 
         /**
          * Creates a status item that appears above a user's avatar. Will always be
          * a client-only object.
-         * @param {object} options Options relating to the status item.
-         * @param {number} options.userID Identifier of the user you would like to create this item for. Default is your own user ID.
-         * @param {number} options.order Order in which to display this status item.
-         * @param {number} options.size Size of the status item.
-         * @param {number} options.width Width of the status item.
-         * @param {number} options.height Height of the status item.
-         * @param {object} properties Properties of the status item to create.
-         * @param {string} properties.id Identifier for this item.
-         * @param {"text"|"image"} properties.type Type of item to show. Only supports text or image items.
-         * @param {string} properties.url URL to an image to show.
-         * @param {string} properties.text Text to show.
-         * @param {string} properties.textColour Color of the text to show. Default is #FFFFFF.
-         * @param {boolean} properties.textBold `true` to show the text as bold, `false` otherwise. Default is `false`.
-         * @param {boolean} properties.textItalics `true` to show the text as italics, `false` otherwise. Default is `false`.
-         * @returns {any} Identifier of the status item that has been created, or `null` if some issue occurred.
+         * @param options Options relating to the status item.
+         * @param properties Properties of the status item to create.
+         * @returns Identifier of the status item that has been created, or `null` if some issue occurred.
          */
-        createStatusItem(options, properties): any
+        createStatusItem(options: StatusOptions, properties: MapItemProperties): string | null
 
         /**
          * Creates a top status icon that appears above a user's avatar. Will always be
          * a client-only object.
-         * @param {object} options Options relating to the top status icon.
-         * @param {number} options.userID Identifier of the user you would like to create this item for. Default is your own user ID.
-         * @param {number} options.order Order in which to display this top status icon.
-         * @param {number} options.size Size of the top status icon.
-         * @param {number} options.width Width of the top status icon.
-         * @param {number} options.height Height of the top status icon.
-         * @param {object} properties Properties of the top status icon to create.
-         * @returns {any} Identifier of the top status icon that has been created, or `null` if some issue occurred.
+         * @param options Options relating to the top status icon.
+         * @param properties Properties of the top status icon to create.
+         * @returns Identifier of the top status icon that has been created, or `null` if some issue occurred.
          */
-        createTopStatusIcon(options, properties): any
+        createTopStatusIcon(options: StatusOptions, properties: MapItemProperties): string | null
 
         /**
          * Updates an existing object.
-         * @param {string} id Identifier of the object to update.
-         * @param {object} options Properties of the object to update.
-         * @param {number[]} options.position X, Y, Z containing the new position. Local only.
-         * @param {number[]} options.quaternion X, Y, Z, W containing the new quaternion rotation. Local only.
-         * @param {boolean} localOnly If true, only the local value of fields are changed. NOTE: If the remote object is updated, it will be overwritten again.
+         * @param id Identifier of the object to update.
+         * @param options Properties of the object to update.
+         * @param localOnly `true` to only update the local values of fields. NOTE: If the remote object is updated, it will be overwritten again.
          */
-        update(id, options, localOnly): void
+        update(id: string, options: MapItemProperties, localOnly: boolean = false): void
 
         /**
          * Updates an existing status item.
-         * @param {string} userID Identifier of the user to update the status item for.
-         * @param {string} itemID Identifier of the status item to update.
-         * @param {object} properties Properties of the object to update.
-         * @param {string} properties.url URL to an image to show.
-         * @param {string} properties.textValue Text to show.
-         * @param {string} properties.textColour Color of the text to show. Default is #FFFFFF.
-         * @param {boolean} properties.textBold `true` to show the text as bold, `false` otherwise. Default is `false`.
-         * @param {boolean} properties.textItalics `true` to show the text as italics, `false` otherwise. Default is `false`.
+         * @param userID Identifier of the user to update the status item for.
+         * @param itemID Identifier of the status item to update.
+         * @param properties Properties of the object to update.
          */
-        updateStatusItem(userID, itemID, properties): void
+        updateStatusItem(userID: string, itemID: string, properties: MapItemProperties): void
 
         /**
          * Updates an existing top status icon.
-         * @param {string} userID Identifier of the user to update the top status icon for.
-         * @param {string} itemID Identifier of the top status icon to update.
-         * @param {object} properties Properties of the object to update.
+         * @param userID Identifier of the user to update the top status icon for.
+         * @param itemID Identifier of the top status icon to update.
+         * @param properties Properties of the object to update.
          */
-        updateTopStatusIcon(userID, itemID, properties): void
+        updateTopStatusIcon(userID: string, itemID: string, properties: MapItemProperties): void
 
         /**
          * Removes an object.
-         * @param {string} id Identifier of the object to remove.
-         * @param {object} options Options relating to the removal of the object.
-         * @param {boolean} options.clientOnly `true` if we only want to remove this object for this user, `false` if we want to remove it from the server.
+         * @param id Identifier of the object to remove.
+         * @param options Options relating to the removal of the object.
+         * @param options.clientOnly `true` if we only want to remove this object for this user, `false` if we want to remove it from the server. Default is `false`.
          */
-        remove(id, options): void
+        remove(id: string, options: { clientOnly: boolean = false }): void
 
         /**
          * Removes the status item that matches the given identifier.
-         * @param {string} userID Identifier of the user to remove the status item from.
-         * @param {string} itemID Identifier of the status item to remove.
+         * @param userID Identifier of the user to remove the status item from.
+         * @param itemID Identifier of the status item to remove.
          */
-        removeStatusItem(userID, itemID): void
+        removeStatusItem(userID: string, itemID: string): void
 
         /**
          * Removes the top status icon that matches the given identifier.
-         * @param {string} userID Identifier of the user to remove the top status icon from.
-         * @param {string} itemID Identifier of the top status icon to remove.
+         * @param userID Identifier of the user to remove the top status icon from.
+         * @param itemID Identifier of the top status icon to remove.
          */
-        removeTopStatusIcon(userID, itemID): void
+        removeTopStatusIcon(userID: string, itemID: string): void
 
         /**
          * Animates an object.
-         * @param {object} options Animation options.
-         * @param {string} options.target Identifier of the object to animate.
-         * @param {object} options.final Final properties of the object after the animation finishes.
-         * @param {string} options.field Field to animate.
-         * @param {any} options.value Final value to animate to.
-         * @param {number} options.duration Number of milliseconds to show the animation for.
-         * @param {number} options.delay Number of milliseconds to wait before starting the animation.
-         * @param {boolean} options.save `true` to save the final state (after the animation completes) to the database, `false` otherwise.
+         * @param options Options relating to the animation of the object.
          */
-        animate(options): void
+        animate(options: AnimateOptions): void
 
         /**
          * Converts from euler angles (in radians) to quaternion.
-         * @param {object} euler Euler angles to convert.
-         * @returns {object} Quaternion.
+         * @param euler Euler angles to convert.
+         * @returns Quaternion.
          */
-        eulerToQuat(euler): object
+        eulerToQuat(euler: Vector3): Quaternion
 
         /**
          * Converts from quaternion angles to euler in radians.
-         * @param {object} quat Quaternion angles to convert.
-         * @returns {object} Euler angles.
+         * @param quat Quaternion angles to convert.
+         * @returns Euler angles.
          */
-        quatToEuler(quat): object
+        quatToEuler(quat: Quaternion): Vector3
 
-        /** Get properties of an object
-         * @param id Identifier of the object to get animations for
-         * @returns {object} Properties of object associated with given identifier
-        */
-        get(id): object
+        /**
+         * Gets the properties of an object.
+         * @param id Identifier of the object to get the properties for.
+         * @returns Properties of the object matching the given identifier.
+         */
+        get(id: string): MapItemProperties
 
         /**
          * Gets the rotation, as a quaternion, for the given object.
-         * @param {string} id Identifier of the object to get the rotation for.
-         * @returns {object} Rotation, as a quaternion, for the given object.
+         * @param id Identifier of the object to get the rotation for.
+         * @returns Rotation, as a quaternion, for the given object.
          */
-        getRotationQuat(id): object
+        getRotationQuat(id: string): Quaternion
 
         /**
          * Gets the rotation, as Euler angles in radians, for the given object.
-         * @param {string} id Identifier of the object to get the rotation for.
-         * @returns {object} Rotation, as Euler angles in radians, for the given object.
+         * @param id Identifier of the object to get the rotation for.
+         * @returns Rotation, as Euler angles in radians, for the given object.
          */
-        getRotationEuler(id): object
+        getRotationEuler(id: string): Vector3
 
-        /** Gets all the current component instances that exist */
-        getComponentInstances(): Array<any>
-
-        /**
-         * Fetch all objects within a radius.
-         * @param {number} x X coord of the center of the circle
-         * @param {number} y Y coord of the center of the circle
-         * @param {number} radius Radius of the circle.
-         * @returns {object[]} Array of objects.
-         */
-        fetchInRadius(x, y, radius): Array<object>
+        /** @returns All the currently registered component instances. */
+        getComponentInstances(): ComponentInstance[]
 
         /**
-         * Get animations of an object as a JSON string
-         * @param {string} id Identifier of the object to get animations for.
-         * @returns {string} JSON string of all animations associated with this object
+         * Fetches all the objects within a radius.
+         * @param X Position in the x axis.
+         * @param y Position in the y axis.
+         * @param radius Radius around the given X and Y co-ordinates.
+         * @returns List of item properties that are within the given radius.
          */
-        getAnimations(id): string
+        fetchInRadius(x: number, y: number, radius: number): MapItemProperties[]
 
         /**
-         * Register a component class so that it can be attached to objects.
-         * @param {Class} Cls The component class.
-         * @param {object} info Details about the component.
-         * @param {string} info.id The component ID.
-         * @param {string} info.name User readable name for this component.
-         * @param {string} info.description Description of the component.
-         * @param {string[]} info.only Types of objects that this component is allowed to attach to. Example: `['plane', 'circle']` to only allow this component to be attached to planes and circles.
-         * @param {boolean} info.serverTick If enabled, the plugin will run onServerTick() on the backend every 30 seconds. Note that much functionality will be missing in that environment.
-         * @param {array} info.settings An array describing the settings to show in the editor panel.
+         * Gets the animations of an object as a JSON string.
+         * @param id Identifier of the object to get animations for.
+         * @returns JSON string of all animations associated with this object.
          */
-        registerComponent(Cls, info): void
+        getAnimations(id: string): string
+
+        /**
+         * Register a component so that it can be attached to objects.
+         * @param component Component to register.
+         * @param info Information about the component.
+         */
+        registerComponent(component: BaseComponent, info: ComponentInfo): void
 
         /**
          * Moves an object to a position.
-         * @param {object} taretPosition Position to move the object to.
-         * @param {string} objectID Identifier of the object.
-         * @param {string} speed Speed to move the object at.
-         * @returns {boolean} `true` if succesful, `false` otherwise.
+         * @param targetPosition Position to move the object to.
+         * @param speed Speed to move the object at.
+         * @param id Identifier of the object to move.
+         * @returns `true` if succesful, `false` otherwise.
          */
-        move(targetPosition, speed, objectID): boolean
+        move(targetPosition: Vector3, speed: number, id: string): boolean
 
         /**
-         * Set your user to follow an object
-         * @param {string} objectID ID of the object
-         * @param {string} speed Speed to move the object at
+         * Toggles your avatar to follow a user or object.
+         * @param id Identifier of the user or object that you would like to follow.
          */
-        toggleFollow(objectID): void
+        toggleFollow(id: string): void
 
-        /** Registers the specified animations with the system
-         * @param {string} url URL of animations that you wish to register
+        /**
+         * Registers the specified animations with the system.
+         * @param url URL of the animations that you wish to register.
          */
-        registerAnimations(url): void
+        registerAnimations(url: string): void
 
     }
 
@@ -726,7 +826,7 @@ declare module 'vatom-spaces-plugins' {
     class User {
 
         /** @returns Position of the current user */
-        getPosition(): { x: number, y: number, z: number }
+        getPosition(): Vector3
 
         /**
          * Sets the position of the current user.
@@ -846,7 +946,7 @@ declare module 'vatom-spaces-plugins' {
          * @param id Identifier of user you wish to get location for.
          * @returns Location of a user that matches the given identifier, or `null` if no such user was found.
          */
-        getUserLocation(id: string): { x: number, y: number, z: number } | null
+        getUserLocation(id: string): Vector3 | null
 
         /**
          * Gets a list of nearby users.
