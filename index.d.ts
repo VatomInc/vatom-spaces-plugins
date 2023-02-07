@@ -414,6 +414,16 @@ declare module 'vatom-spaces-plugins' {
         /** Handles interaction with the storage system */
         storage: StorageComponent
 
+        /** Handles pathing */
+        paths: {
+            /**
+             * Converts a relative path to an absolute path.
+             * @param path Relative path to an image.
+             * @returns Absolute path to the image.
+             */
+            absolute: (path: string) => string
+        }
+
         /** Called when the plugin is loaded */
         onLoad(): void
 
