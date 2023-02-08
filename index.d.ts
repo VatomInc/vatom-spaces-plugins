@@ -1,34 +1,403 @@
 declare module 'vatom-spaces-plugins' {
-    
+
+    /** 2D vector */
+    interface Vector2 {
+        x: number,
+        y: number
+    }
+
+    /** 3D vector */
+    interface Vector3 {
+        x: number,
+        y: number,
+        z: number
+    }
+
+    /** Quaternion */
+    interface Quaternion {
+        x: number,
+        y: number,
+        z: number,
+        w: number,
+    }
+
+    /** Details about a plugin */
+    interface PluginDetails {
+        /** Identifier of the plugin */
+        id: string,
+        /** Name of the plugin */
+        name: string,
+        /** Description of the plugin */
+        description: string,
+        /** Identifier of the business that created the plugin */
+        business_id: string,
+        /** Version of the plugin */
+        version: number
+    }
+
+    /** Event that contains information from an input capture */
+    interface InputCaptureEvent {
+        /** Width of the current window. */
+        windowWidth: number,
+        /** Height of the current window. */
+        windowHeight: number,
+        /** Identifier of the object given when the request started. */
+        objectID: string,
+        /** World co-ordinates of the hit point (only if an object identifier was given). */
+        point?: Vector3,
+        /** UV co-ordinates of the hit point (only if an object identifier was given). Useful for interacting with 2D content on a 3D plane. */
+        uv?: Vector2
+    }
+
+    /** Options relating to playback of audio */
+    interface AudioOptions {
+        /** Position in the x axis. */
+        x: number,
+        /** Position in the y axis. */
+        height: number,
+        /** Position in the z axis. */
+        y: number,
+        /** Radius around the position in which to play the sound. */
+        radius: number,
+        /** Volume at which to play the sound. Value should be between 0 and 1. Default is 1, which indicates full volume. */
+        volume: number
+    }
+
+    /** Used for registering hooks that propagate client-side */
+    interface Hook {
+        /** Name of the hook. */
+        name: string,
+        /** Function to execute when the hook is triggered. */
+        callback: HookCallback
+    }
+
+    /** Represents a panel that can be attached to a menu item. */
+    interface MenuPanel {
+        /** URL to display in this panel as an iframe. Cannot use in conjunction with `component`. */
+        iframeURL?: string,
+        /** A React component to display. The component will receive the following props: `plugin`, `onClose`. Cannot use in conjunction with `iframeURL`. */
+        component?: any,
+        /** Width of the panel. Default is 320 pixels. */
+        width?: number,
+        /** Maximum height (in pixels) that the panel should be. Defaults to the height of the content inside. */
+        maxHeight?: number
+    }
+
+    /** Represents a menu item that can be registered */
+    interface MenuItem {
+        /** Identifier of the menu item. */
+        id: string,
+        /** URL to the icon for the menu. */
+        icon: string,
+        /** Text to display under the icon. */
+        text: string,
+        /** Location of the menu item. */
+        section: "controls" | "usermenu" | "infopanel" | "overlay-top" | "plugin-settings" | "start-screen" | "file-menu" | "insert-object" | "admin-panel",
+        /** Title of the icon. */
+        title: string,
+        /** Color that will be used for both the icon and the text. */
+        color: string,
+        /** Color that will be used for just the text. Defaults to `color` if not given. */
+        textColor?: string,
+        /** Sorting order for this item, ranging from 0 (on the left) to infinity (on the right). Default is 0. */
+        order?: number,
+        /** `true` when the menu item should stay either on or off (e.g: mute/unmute or avatar video), `false` otherwise. Default is `false`. */
+        persistent?: boolean,
+        /** `true` to use the actual icon provided (instead of changing icon color), `false` to change icon color based on `color` field. Default is `false`. */
+        useRawIcon?: boolean,
+        /** `true` to hide the menu item from non-admins, `false` to show the menu item to non-admins. Default is `false`. */
+        adminOnly?: boolean,
+        /** If `true` and section == 'usermenu', the menu icon appears on the current user's options. Default is `false`. */
+        currentUser?: boolean,
+        /** If `false` and section == 'usermenu', the menu icon does not appear on other user's options. Default is `true`. */
+        otherUsers?: boolean,
+        /** Number to show as a notification badge on the menu item. Does not display a badge for values <= 0. */
+        badgeCount?: number,
+        /** Called when the menu button is pressed. */
+        action?: (evt: { id: string, name: string, profileURL: string }) => void,
+        /** Panel that will be displayed when this menu item is clicked. */
+        panel: MenuPanel
+    }
+
+    /** Item to show as a popup. */
+    interface PopupItem {
+        /** Title of the popup. */
+        title: string,
+        /** Panel that should be displayed. */
+        panel: MenuPanel
+    }
+
+    /** Options relating to the user status bar */
+    interface StatusOptions {
+        /** Identifier of the user you would like to create this item for. Default is your own user ID. */
+        userID: string,
+        /** Order in which to display this top status icon. */
+        order: number,
+        /** Size of the top status icon. */
+        size: number,
+        /** Width of the top status icon. */
+        width: number,
+        /** Height of the top status icon. */
+        height: number
+    }
+
+    /** Options relating to the animation of an object */
+    interface AnimateOptions {
+        /** Identifer of the object to animate. */
+        target: string,
+        /** Final properties of the object after the animation finishes. Cannot be used in conjunction with `field`. */
+        final: MapItemProperties,
+        /** Field to animate. Cannot be used in conjunction with `final`. */
+        field: "position.x" | "position.y" | "position.z" | "scale" | "opacity",
+        /** Final value to animate to. */
+        value: any,
+        /** Number of milliseconds to show the animation for. */
+        duration: number,
+        /** Number of milliseconds to wait before starting the animation. */
+        delay: number,
+        /** `true` to save the final state (after the animation completes) to the database, `false` otherwise. */
+        save: boolean
+    }
+
+    /** Instance for a component */
+    interface ComponentInstance {
+        /** Reference to the plugin that registered this component. */
+        plugin: BasePlugin
+        /** Identifier of this component instance. */
+        componentID: string,
+        /** Identifier of the object that this component is attached to. */
+        objectID: string,
+        /** Properties for the object that this component is attached to. */
+        fields: MapItemProperties
+    }
+
+    /** Settings for a component */
+    interface ComponentSettings {
+        /** Identifier of this setting. */
+        id: string,
+        /** Name of this setting. */
+        name: string,
+        /** Type of this setting. */
+        type: "label" | "section" | "collapse-section" | "select" | "select-item" | "file" | "color" | "checkbox" | "button" | "field-button" | "half-button" | "number" | "text" | "slider" | "vector2" | "vector3" | "textarea",
+        /** Value of the setting. Do not specify if users should be able to change the value. */
+        value: any,
+        /** Description of what the setting does. */
+        help: string,
+        /** When the type is `"select"`, this represents the list of values in the dropdown. */
+        values?: any[],
+        /** When the type is `"select"`, `"color"`, `"checkbox"`, `"number"`, `"text"`, `"slider"` or `"textarea"`, this represents the default value to use when no value already exists. */
+        default?: any,
+        /** When the type is `"slider"`, this represents the minimum value. Default is 0. */
+        min?: number,
+        /** When the type is `"slider"`, this represents the maximum value. Default is 1. */
+        max?: number,
+        /** When the type is `"slider"`, `true` shows the value as a percentage (i.e. multiplies the value by 100), whereas `false` will show the raw value. Default is `false`. */
+        percent?: boolean,
+        /** When the type is `"slider"`, `true` fills the slider up to the current value (useful for volume slider), whereas `false` does not fill the slider. Default is `false`. */
+        fill?: boolean,
+        /** When the type is `"slider"`, `true` shows the current value, `false` otherwise. Default is `false`. */
+        showValue?: boolean,
+        /** When the type is `"slider"`, this represents the number of decimal places to use for the value. Default is 0. */
+        precision?: number
+    }
+
+    /** Information regarding a component */
+    interface ComponentInfo {
+        /** Identifier of this component. */
+        id: string,
+        /** Name of this component. */
+        name: string,
+        /** Description of this component. */
+        description: string,
+        /** Settings that can be changed by users. */
+        settings: ComponentSettings[] | ((item: MapItemProperties) => ComponentSettings[]),
+        /** List of item types that this component can be attached to. */
+        only?: string[],
+    }
+
+    /** Options used when creating a texture */
+    interface TextureOptions {
+        /** Width of the texture. Should be a power of 2. */
+        width: number,
+        /** Height of the texture. Should be a power of 2. */
+        height: number
+    }
+
+    /** Properties for a map item */
+    interface MapItemProperties {
+        /** Identifier of this item. */
+        id: string,
+        /** Type of this item. */
+        type: string,
+        /** Position in the x axis. */
+        x: number,
+        /** Position in the y axis. */
+        height: number,
+        /** Position in the z axis. */
+        y: number,
+        /** `true` if this item is not allowed to be edited, `false` otherwise. */
+        locked: boolean,
+        /** `true` if this item has a click interaction, `false` otherwise. */
+        targetable: boolean,
+        /** `true` if this item has collision enabled, `false` otherwise. */
+        collide: boolean,
+        /** `true` if this item only exists locally and not saved in the database, `false` if it exists in the database. */
+        clientOnly: boolean
+    }
+
+    /** Represents a map item that can be found in the space */
+    interface MapItem {
+        /** Identifier of this item. */
+        id: string,
+        /** `true` if this item is an avatar, `false` otherwise. */
+        isAvatar: boolean,
+        /** Properties for this item. */
+        properties: MapItemProperties,
+        /**
+         * Updates the properties of this object.
+         * @param props Properties that should be updated.
+         * @param save `true` to save this change to the database (only allowed by admins), `false` to keep the object client-side. Default is `false`.
+         * @param merge `true` to set the given properties as the item properties, overriding any properties not given. `false` to combine the given properties with the existing properties. Default is `false`.
+         */
+        updateProperties: (props: {}, save: boolean = false, merge: boolean = false) => Promise<void>,
+        /**
+         * Called when this item has been clicked.
+         * @param emit `true` to notify any `"click"` event listeners, `false` otherwise. Default is `true`
+         * @param raycastHit Hit from the raycast. Default is `null`.
+         */
+        onClick: (emit: boolean = true, raycastHit: RaycastHit = null) => void
+    }
+
+    /** Represents a map item that is used by avatars */
+    interface AvatarMapItem extends MapItem {
+        /** Name of the user. */
+        displayName: string,
+        /** Color of the user. */
+        color: string,
+        /** Volume of the user, in dB. */
+        volume: number,
+        /** `true` if the user is muted, `false` otherwise. */
+        muted: boolean,
+        /** `true` if the user is speaking, `false` otherwise. */
+        isSpeaking: boolean,
+        /** `true` if this is the primary item for the user. */
+        isPrimary: boolean
+    }
+
+    /** Data related to registering a new avatar */
+    interface AvatarData {
+        /** Identifier for the avatar. */
+        id: string,
+        /** Name of the avatar. */
+        name: string,
+        /** Type of the avatar. */
+        type: string,
+        /** URL to the avatar model. */
+        modelURL?: string,
+        /** Properties for the avatar. */
+        properties?: {}
+    }
+
+    /** Data related to a single user */
+    interface UserData {
+        /** Identifier for this user. */
+        id: string,
+        /** Name of this user. */
+        name: string,
+        /** Database identifier for this user. */
+        userID: string,
+        /** Role for this user. */
+        role?: string
+    }
+
+    /** Options for the animation overriding */
+    interface AnimationOverrideOptions {
+        /** Name of the animation to play, without the skeleton name. */
+        animation: string,
+        /** Name of the animation to play before the main animation, without the skeleton name. */
+        animation_start?: string,
+        /** Name of the animation to play when ending the override, without the skeleton name. */
+        animation_end?: string,
+        /** Amount of times to play the animation for, or `true` to loop forever. Default is 1. */
+        loop?: number | boolean,
+        /** Locks the avatar into moving at this fixed speed per second (user won't be able to move their avatar while the animation is running). Specify `{ x: 0, y: 0, z: 0 }` to lock the avatar in place. */
+        fixed_movement?: Vector3,
+        /** Can be `"smooth"` (default) to wait for the animation cycle to complete, `"immediate"` to cancel the animation immediately when the user moves, or `"none"` to not allow the user to cancel movement. */
+        cancel_mode?: "smooth" | "immediate" | "none",
+        /** `true` to merge the animation with the default animations for walk, run etc. */
+        merge?: boolean
+    }
+
+    /** Represents a hit from a raycast */
+    interface RaycastHit {
+        /** Item that has been hit. */
+        mapItem: MapItem,
+        /** Distance between the current user and the object that has been hit. */
+        distance: number,
+        /** Point of intersection (in world co-ordinates) */
+        point?: Vector3
+    }
+
+    /** Options relating to performing a raycast */
+    interface RaycastOptions {
+        /** Point, with values between 0 and 1, determing the co-ordinate on the screen. Use `{ x: 0.5, y: 0.5 }` to pick from the center of the screen. */
+        screenPosition: Vector2,
+        /** Start of the ray in 3D space. */
+        worldPosition: Vector3,
+        /** Direction of the ray. Ignored if `screenPosition` is given. */
+        worldDirection: Vector3,
+        /** Length of the ray. Default is infinity. */
+        length: number,
+        /** `true` to only hit items with `collide === true` set, `false` to hit all items. */
+        collision: boolean
+    }
+
+    /** Event that contains information from a component being clicked */
+    interface ComponentClickEvent {
+        /** Point at which the click hit, in world space. */
+        position: Vector3,
+        /** Position on the UV that was hit. Can be used to calculate where on a shape the click happened (e.g.: `let x = uv.x * screenWidth`) */
+        uv: Vector2
+    }
+
+    /** Callback function for an input capture event */
+    type InputCaptureCallback = (event: InputCaptureEvent) => void
+
+    /** Callback function for a hook */
+    type HookCallback = (data: any) => any
+
+    /** Type of bucket to use when interfacing with storage */
+    type BucketType = "space" | "server" | "user"
+
     /** Base plugin class. All plugins should extend this class. */
     class BasePlugin {
 
-        /** Plugin ID */
+        /** Identifier for this plugin */
         id: string
-        /** Plugin name */
+        /** Name of this plugin */
         name: string
-        /** Plugin description */
+        /** Description of this plugin */
         description: string
-        /** Plugin business ID */
+        /** Identifier of the business that this plugin belongs to */
         business_id: string
-        /** Plugin version number */
+        /** Current version of this plugin */
         version: number
 
         /** React component for the settings panel of this plugin */
         settingsPanel: any
-        
+
         /** Color of this plugin's control button when selected (if in use) */
-        selectedColour: string
+        selectedColour: '#2DCA8C'
         /** Color of this plugin's control button when unselected (if in use) */
-        unselectedColour: string
+        unselectedColour: '#AAAAAA'
         /** Color of this plugin's control button when inactive (if in use) */
-        inactiveColour: string
+        inactiveColour: '#FA5252'
 
         /** Handles interaction with the main app */
         app: AppComponent
         /** Handles interaction with the audio system */
         audio: Audio
-        /** Handles the registering and invoking of hooks, which are overridable global events. */
+        /** Handles the registering and invoking of hooks, which are overridable global events */
         hooks: HooksComponent
         /** Handles interaction with the menu system */
         menus: Menus
@@ -45,593 +414,467 @@ declare module 'vatom-spaces-plugins' {
         /** Handles interaction with the storage system */
         storage: StorageComponent
 
-        /** Constructor */
-        constructor()
-        
-        /** Called on plugin load */
+        /** Handles pathing */
+        paths: {
+            /**
+             * Converts a relative path to an absolute path.
+             * @param path Relative path to an image.
+             * @returns Absolute path to the image.
+             */
+            absolute: (path: string) => string
+        }
+
+        /** Called when the plugin is loaded */
         onLoad(): void
 
-        /** Called on plugin unload */
+        /** Called when the plugin is unloaded (usually from uninstalling the plugin) */
         onUnload(): void
 
         /** Called when the settings for this plugin have changed */
         onSettingsUpdated(): void
 
-        /** Called on all instances when you call `this.messages.send()`. 
-         * @param {object} msg message sent to all instances
-         * @param {string} fromID ID of message sender
+        /**
+         * Called when this plugin has received a message originating from this same plugin.
+         * @param msg Message that has been received.
+         * @param fromID Identifier of the user who sent the message.
          */
-        onMessage(msg, fromID): void
-
-        /** Called on all instances when you call `this.messages.request()`. The first instance with a truthy return value is used as the response. 
-         * @param {object} msg message sent to all instances
-         * @param {string} fromID ID of message sender
-         */
-        onRequest(msg, fromID): void
+        onMessage(msg: any, fromID: string): void
 
         /**
-         * Called when the user's position moves from the given co-ordinates
-         * @param {number} x x co-ordinate 
-         * @param {number} y y co-ordinate 
-         * @param {number} z z co-ordinate 
+         * Called when this plugin has received a request. The first instance
+         * with a truthy return value is used as the response.
+         * @param msg Message that has been requested.
+         * @param fromID Identifier of the user who sent the message.
          */
-        onUserMoved(x, y, z): void
+        onRequest(msg: any, fromID: string): void
 
-        /** Called when the user's profile data is updated */
+        /**
+         * Called when the current user has moved.
+         * @param x Position of the user in the `x` axis.
+         * @param y Position of the user in the `y` axis.
+         * @param z Position of the user in the `z` axis.
+         */
+        onUserMoved(x: number, y: number, z: number): void
+
+        /** Called when the current user's profile data has changed */
         onCurrentUserUpdated(): void
 
         /**
-         * Gets plugin configuration field
-         * @param {string} id ID of field
-         * @returns {any} value of configuration field attached to given name
+         * Gets the value from the given field.
+         * @param id Identifier of the field to get the value from.
          */
-        getField(id): any
+        getField(id: string): any
 
         /**
-         * Sets plugin configuration field (only admins can successfully do this)
-         * @param {string} id ID of field
-         * @param {any} value Value to set field to
+         * Sets the value of the given field, which only admins can do.
+         * @param id Identifier of the field to set.
+         * @param value Value to set the field to.
          */
-        setField(id, value): void
+        setField(id: string, value: any): void
 
         /**
          * Gets the component field for a given object.
-         * @param {object} object Object to get the component field for.
-         * @param {string} componentID Identifier of the component to get the field for.
-         * @param {string} name Name of the field.
-         * @returns {string} Component field for the given object.
+         * @param objectID Identifier of the object to get the component field for.
+         * @param componentID Identifier of the component to get the field for.
+         * @param name Name of the field.
+         * @returns Value of the component field.
          */
-        getComponentField(object, componentID, name): string
+        getComponentField(objectID: string, componentID: string, name: string): any
+
     }
 
     /** Handles interaction with the main app */
     class AppComponent {
 
-        /** Constructor
-         * @param {any} plugin reference to plugin
+        /**
+         * Requests the platform to use this plugin in a trusted environment.
+         * @returns `true` if this plugin is allowed to be used in a trusted environment, `false` otherwise.
          */
-        constructor(plugin)
+        requestTrustedSwitch(): boolean
 
         /**
-        * Returns details about the plugin if it's loaded, or else returns null
-        * @param {string} pluginID ID of plugin you are fetching details for
-        */
-        getPluginDetails(pluginID): object
+         * Gets details about the plugin if it has been loaded, otherwise it returns `null`.
+         * @param id Identifier of the plugin to get details for.
+         */
+        getPluginDetails(id: string): PluginDetails
+
+        /**
+         * Checks if the given object has its input captured by a plugin.
+         * @param id Identifier of the object that should be checked.
+         * @returns `true` if this object has its input captured, `false` otherwise.
+         */
+        hasInputCapture(id: string): boolean
 
         /**
          * Request full input event capture. While capture is active, all keyboard and pointer events will be sent
-         * to your callback.
+         * to the given callback.
          *
-         * When capturing ends, you will receive one last message with `type` equal to `"input-capture-ended"`.
-         *
-         * All events contain the standard PointerEvent or KeyboardEvent fields, but with these extra fields as well:
-         * - `windowWidth` : Current size of the window
-         * - `windowHeight` : Current size of the window
-         * - `objectID` : The objectID specified when the request started.
-         * - `point` : A Vector3 containing the world coordinates of the hit point. Only if objectID was set.
-         * - `uv` : A Vector2 containing the UV coordinates of the hit point. Only if objectID was set. This is useful for interacting with 2D content on a 3D plane.
-         *
-         * @param {string} objectID Optional object to capture input for. If specified, will try to extract world coordinates and UV coordinates for each pointer event.
-         * @param {function} callback The callback to send events to.
+         * When capturing ends, one last message will be sent, equivalent to:
+         * ```js
+         * this.messages.send({ type: "input-capture-ended" })
+         * ```
+         * @param id Identifier of the object to capture input for.
+         * @param callback Function to execute when receiving an event.
          */
-        requestInputCapture(objectID, callback): void
+        requestInputCapture(id: string, callback: InputCaptureCallback): void
 
-        /** Stop the current input capture, if any. */
+        /** Stops the current input capture, if any. */
         stopInputCapture(): void
 
     }
 
     /** Handles interaction with the audio system */
     class Audio {
-        
-        /** Constructor
-         * @param {any} plugin reference to plugin
-         */
-        constructor(plugin)
 
         /**
-         * Preload a sound effect so it can be played immediately.
-         * @param {string} url The sound URL
+         * Preloads a sound, so that the call to `play()` does not have to wait.
+         * @param url URL to the sound effect.
          */
-        preload(url): void
+        preload(url: string): void
 
-        /** Plays audio in the space. Should only be used for small audio files.
-        * @param {string} url URL to the sound file.
-        * @param {object} options Sound options.
-        * @param {number} options.radius Radius of the sound.
-        * @param {number} options.x Position in the x axis.
-        * @param {number} options.y Position in the y axis.
-        * @param {number} options.height Height to play the audio at.
-        * @param {number} options.volume Volume that the sound should play at. Value should be between 0 and 1. Default is 1, which indicates full volume.
-        * @returns {Promise<string>} Identifier of the audio source that is being played, or `null` if something went wrong.
-        */
-        play(url, options): Promise<string>
+        /**
+         * Plays audio in the space. Should only be used for small audio files.
+         * @param url URL to the sound file.
+         * @param options Options relating to the playback.
+         * @returns Identifier of the audio source that is being played, or `null` if something went wrong.
+         */
+        play(url: string, options: AudioOptions): Promise<string> | null
 
         /**
          * Stops playing an audio source with the matching identifier.
-         * @param {string} id Identifier of the audio source to stop.
+         * @param id Identifier of the audio source to stop.
          */
-        stop(id): void
+        stop(id: string): void
 
     }
 
     /** Handles the registering and invoking of hooks, which are overridable global events. */
     class HooksComponent {
 
-        /** Array of all registered hooks */
-        registeredHooks: Array<any>
-
-        /** Constructor
-         * @param {any} plugin reference to plugin
+        /**
+         * Registers a hook event handler.
+         * @param name Name of the hook.
+         * @param callback Function to be called. If this function returns a truthy value, the hook is interrupted.
          */
-        constructor(plugin)
-
-        /** 
-         * Register a hook 
-         * 
-         * @param {string} name The name of the hook.
-         * @param {function} callback The function to be called. If this function returns a truthy value, the hook is interrupted.
-         */
-        addHandler(name, callback): void
-
-        /** 
-         * Remove a hook 
-         * 
-         * @param {string} name The name of the hook.
-         * @param {function} callback The function to be called.
-         */
-        removeHandler(name, callback): void
-
-         /**
-         * Trigger a hook. If any handler returns a truthy value, hook processing will stop and that value will be returned.
-         * 
-         * @param {string} name Name of the hook
-         * @param {any} data Any data to be passed to the handlers.
-         * @returns {Promise<any>} The response from the first handler with a truthy value, or else false.
-         */
-        trigger(name, data): Promise<any>
+        addHandler(name: string, callback: HookCallback): void
 
         /**
-         * Trigger a hook and return all truthy responses.
-         * 
-         * @param {string} name Name of the hook
-         * @param {any} data Any data to be passed to the handlers.
-         * @returns {Promise<any[]>} All truthy responses.
+         * Removes a hook event handler.
+         * @param name Name of the hook.
+         * @param callback Function that was used for the hook.
          */
-        triggerAll(name, data): Promise<any[]>
+        removeHandler(name: string, callback: HookCallback): void
+
+        /**
+         * Triggers a hook that matches the given name. If any handler returns a
+         * truthy value, hook processing will stop and that value will be returned.
+         * @param name Name of the hook.
+         * @param data Any data to be passed to the handlers.
+         * @returns Response from the first handler with a truthy value, or else false.
+         */
+        trigger(name: string, data: any): Promise<any>
+
+        /**
+         * Triggers a hook and returns all truthy responses.
+         * @param name Name of the hook.
+         * @param data Any data to be passed to the handlers.
+         * @returns All truthy responses.
+         */
+        triggerAll(name: string, data: any): Promise<any[]>
 
     }
 
     /** Handles interaction with the menu system */
     class Menus {
 
-        /** List of registered menu items */
-        items: Array<any>
-
-        /** List of active popup windows */
-        popups: Array<any>
-
-        /** Constructor
-         * @param {any} plugin reference to plugin
-         */
-        constructor(plugin)
-
         /**
          * Registers a new menu item.
-         *
-         * Available `section` parameters are:
-         * - `"controls"` : Displays the menu item in the bottom control bar. If a panel is specified, it will open in the accordion.
-         * - `"usermenu"` : Displays the menu item as an action in the panel that appears when clicking on a user. Properties `currentUser` and `otherUsers` use this section.
-         * - `"infopanel"` : Displays the panel permanently as a transparent overlay in the top-right. Good place for information such as tasks to complete, etc.
-         * - `"overlay-top"` : Displays the panel permanently as a transparent overlay along the top of the app. This obstructs user controls, so it should only be used for short alerts before being removed.
-         * - `"plugin-settings"` : Displays the panel when a user clicks the "Settings" button next to a plugin. Only one of this type should be registered per plugin. Only accessible to admin users.
-         * - `"start-screen"` : Adds this panel as an option under File > Settings > Welcome Screen. The selected screen can be displayed instead of the normal start screen. Only accessible to admin users.
-         * - `"file-menu"` : Displays the menu item under the File dropdown in the top admin menu bar. Only accessible to admin users.
-         * - `"insert-object"` : Displays an item in the Insert menu.
-         * - `"admin-panel"` : Displays the menu item in the container shown when clicking the "Admin" button in the bottom menu bar. Only accessible to admin users.
-         * - `"bottom-accordion"` : Displays a panel that will permanently appear at the bottom of the accordion.
-         *
-         * @param {object} args Menu configuration
-         * @param {string} args.id Identifier of the menu item.
-         * @param {string} args.icon URL to the icon for the menu.
-         * @param {string} args.text Text to display under the icon. Default is 'Text'.
-         * @param {string} args.section Location of the menu item. Default is 'controls'.
-         * @param {string} args.title Title of the icon.
-         * @param {string} args.color Color that will be used for both the icon and the text.
-         * @param {string} args.textColor Color that will be used for just the text. Defaults to `color` if not given.
-         * @param {number} args.order Sorting order for this item. Default is 0.
-         * @param {boolean} args.persistent `true` when the menu item should stay either on or off (e.g: mute/unmute or avatar video), `false` otherwise. Default is `false`.
-         * @param {boolean} args.useRawIcon `true` to use the actual icon provided (instead of changing icon color), `false` to change icon color based on `color` field. Default is `false`.
-         * @param {boolean} args.adminOnly `true` to hide the menu item from non-admins, `false` to show the menu item to non-admins. Default is `false`.
-         * @param {boolean} args.currentUser If specified, and section == 'usermenu', the menu icon appears on the current user's menu bar
-         * @param {boolean} args.otherUsers Default = "true". If false, and section == 'usermenu', the menu icon does not appear on other user's menu bar
-         * @param {number} args.badgeCount Number to show as a notification badge on the menu item. Does not display a badge for values <= 0.
-         * @param {Function} args.action If specified, this function will be called when the button is pressed.
-         * @param {object} args.panel If specified, a panel will be displayed when this menu item is clicked.
-         * @param {Component} args.panel.iframeURL The URL to display in the panel's iframe.
-         * @param {Component} args.panel.component A React component to display. The component will receive these props: `plugin`, `onClose`
-         * @param {boolean} args.panel.alwaysRender If true, the panel is always running and just made hidden when not opened.
-         * @param {number} args.panel.width The width of the panel. Default = 320.
-         * @param {number} args.panel.maxHeight Maximum height (in pixels) that the panel should be. Defaults to the height of the content inside.
-         * @returns {string} Identifier for the menu item.
+         * @param options Menu options.
+         * @returns Identifier for the menu item.
          */
-        register(args): string
+        register(options: MenuItem): string
 
         /**
          * Updates the fields for the given menu item.
-         * @param {string} id Identifier of the menu item to update.
-         * @param {object} changes Changes to make to the menu item.
+         * @param id Identifier of the menu item to update.
+         * @param changes Changes to make to the menu item.
          */
-        update(id, changes): void
+        update(id: string, changes: MenuItem): void
 
         /**
          * Unregisters an existing menu item.
-         * @param {string} id Identifier for the menu item to unregister.
+         * @param id Identifier for the menu item to unregister.
          */
-        unregister(id): void
+        unregister(id: string): void
 
-        /** Display a popup UI. See register() for a description of the `args` parameters. 
-         * @param {object }args popup configuration
-         * @param {string} args.title Title of popup
-         * @param {object} args.panel Component that is being displayed
-         * @param {string} args.panel.iframeURL URL of iframe shown in popup
-         * @param {number} args.panel.width Width of panel
-         * @param {number} args.panel.height Height of panel
-         * 
-        */
-        displayPopup(args): void
+        /**
+         * Displays a popup.
+         * @param options Popup configuration options.
+         */
+        displayPopup(options: PopupItem): void
+
     }
 
     /** Handles communication between different instances of the plugin */
     class Messages {
-        /** Constructor
-         * @param plugin reference to plugin
-         */
-        constructor(plugin)
 
         /**
-         * Send a message to all instances of your plugin. The message will be received in the onMessage function.
-         * 
-         * @param {object} msg The message to send.
-         * @param {bool} isGlobal If true, will send to everyone on the entire server instead of just everyone within rendering range.
-         * @param {string} targetUserID If specified, sends a message to a specific user, independent of where that user is.
-         * @param {string} objectID If specified, attaches given objectID with the sent payload
-         * @param {string} componentID If specified, attaches given componentID with the sent payload
+         * Send a message to all instances of this plugin on other devices.
+         * Message will be received in the `onMessage` method.
+         * @param msg Message to send.
+         * @param isGlobal `true` to send to everyone on the entire server, `false` to send to everyone within rendering range. Default is `false`.
+         * @param targetUserID If given, it is the identifier of a user to send a message to (regardless of where that user is). Default is ''.
+         * @param objectID If given, this object identifier will be attached to the sent payload. Default is ''.
+         * @param componentID If given, this component identifier will be attached to the sent payload. Default is ''.
          */
-        send(msg, isGlobal, targetUserID, objectID, componentID): void
+        send(msg: any, isGlobal: boolean = false, targetUserID: string = '', objectID: string = '', componentID: string = ''): void
 
         /**
-         * Send a message to all instances of the plugin, and then wait for the first response.
-         * 
-         * @param {object} msg The message to send.
-         * @param {bool} isGlobal If true, will send to everyone on the entire server instead of just everyone within rendering range.
-         * @param {string} targetUserID If specified, sends a message to a specific user, independent of where that user is.
-         * @param {string} objectID If specified, attaches given objectID with the sent payload
-         * @param {string} componentID If specified, attaches given componentID with the sent payload
-         * @returns {Promise<*>} The response.
+         * Send a message to all instances of this plugin on other devices, and
+         * then wait for the first response.
+         * @param msg Message to send.
+         * @param isGlobal `true` to send to everyone on the entire server, `false` to send to everyone within rendering range. Default is `false`.
+         * @param targetUserID If given, it is the identifier of a user to send a message to (regardless of where that user is). Default is ''.
+         * @param objectID If given, this object identifier will be attached to the sent payload. Default is ''.
+         * @param componentID If given, this component identifier will be attached to the sent payload. Default is ''.
+         * @returns Response from the request.
          */
-        request(msg, isGlobal, targetUserID, objectID, componentID): Promise<any>
-        
+        request(msg: any, isGlobal: boolean = false, targetUserID: string = '', objectID: string = '', componentID: string = ''): Promise<any>
+
     }
 
     /** Handles the creation and manipulation of objects in the space */
     class Objects {
 
-        /** Last object ID */
-        lastID: number
-
-        /** All registered components for this plugin */
-        components: Array<any>
-
-        /** Active component instances */
-        componentInstances: Array<any>
-
-        /** Constructor
-         * @param plugin reference to plugin
-         */
-        constructor(plugin)
-
-        /** Gets all objects */
-        all(): Array<any>
-
         /**
          * Creates a new object. Will be created as a client-only object, unless
-         * `clientOnly: false` is specified.
-         * @param {object} options Options relating to the object to create.
-         * @param {number} options.x X co-ordinate to place the object.
-         * @param {number} options.height Y co-ordinate to place the object.
-         * @param {number} options.y Z co-ordinate to place the object.
-         * @param {boolean} options.clientOnly `true` to only create this object for yourself, `false` to create for everyone in the space. Default is `true`.
-         * @param {object} options.position Position to place the object.
-         * @param {number} options.position.x X co-ordinate to place the object.
-         * @param {number} options.position.y Y co-ordinate to place the object.
-         * @param {number} options.position.z Z co-ordinate to place the object.
-         * @returns {string} Identifier of the object that has been created.
+         * `clientOnly: false` is specified in the options.
+         * @param options Options relating to the object to create.
+         * @returns Identifier of the object that has been created.
          */
-        create(options): string
+        create(options: MapItemProperties): string
 
         /**
          * Creates a status item that appears above a user's avatar. Will always be
          * a client-only object.
-         * @param {object} options Options relating to the status item.
-         * @param {number} options.userID Identifier of the user you would like to create this item for. Default is your own user ID.
-         * @param {number} options.order Order in which to display this status item.
-         * @param {number} options.size Size of the status item.
-         * @param {number} options.width Width of the status item.
-         * @param {number} options.height Height of the status item.
-         * @param {object} properties Properties of the status item to create.
-         * @param {string} properties.id Identifier for this item.
-         * @param {"text"|"image"} properties.type Type of item to show. Only supports text or image items.
-         * @param {string} properties.url URL to an image to show.
-         * @param {string} properties.text Text to show.
-         * @param {string} properties.textColour Color of the text to show. Default is #FFFFFF.
-         * @param {boolean} properties.textBold `true` to show the text as bold, `false` otherwise. Default is `false`.
-         * @param {boolean} properties.textItalics `true` to show the text as italics, `false` otherwise. Default is `false`.
-         * @returns {any} Identifier of the status item that has been created, or `null` if some issue occurred.
+         * @param options Options relating to the status item.
+         * @param properties Properties of the status item to create.
+         * @returns Identifier of the status item that has been created, or `null` if some issue occurred.
          */
-        createStatusItem(options, properties): any
+        createStatusItem(options: StatusOptions, properties: MapItemProperties): string | null
 
         /**
          * Creates a top status icon that appears above a user's avatar. Will always be
          * a client-only object.
-         * @param {object} options Options relating to the top status icon.
-         * @param {number} options.userID Identifier of the user you would like to create this item for. Default is your own user ID.
-         * @param {number} options.order Order in which to display this top status icon.
-         * @param {number} options.size Size of the top status icon.
-         * @param {number} options.width Width of the top status icon.
-         * @param {number} options.height Height of the top status icon.
-         * @param {object} properties Properties of the top status icon to create.
-         * @returns {any} Identifier of the top status icon that has been created, or `null` if some issue occurred.
+         * @param options Options relating to the top status icon.
+         * @param properties Properties of the top status icon to create.
+         * @returns Identifier of the top status icon that has been created, or `null` if some issue occurred.
          */
-        createTopStatusIcon(options, properties): any
+        createTopStatusIcon(options: StatusOptions, properties: MapItemProperties): string | null
 
         /**
          * Updates an existing object.
-         * @param {string} id Identifier of the object to update.
-         * @param {object} options Properties of the object to update.
-         * @param {number[]} options.position X, Y, Z containing the new position. Local only.
-         * @param {number[]} options.quaternion X, Y, Z, W containing the new quaternion rotation. Local only.
-         * @param {boolean} localOnly If true, only the local value of fields are changed. NOTE: If the remote object is updated, it will be overwritten again.
+         * @param id Identifier of the object to update.
+         * @param options Properties of the object to update.
+         * @param localOnly `true` to only update the local values of fields. NOTE: If the remote object is updated, it will be overwritten again.
          */
-        update(id, options, localOnly): void
+        update(id: string, options: MapItemProperties, localOnly: boolean = false): void
 
         /**
          * Updates an existing status item.
-         * @param {string} userID Identifier of the user to update the status item for.
-         * @param {string} itemID Identifier of the status item to update.
-         * @param {object} properties Properties of the object to update.
-         * @param {string} properties.url URL to an image to show.
-         * @param {string} properties.textValue Text to show.
-         * @param {string} properties.textColour Color of the text to show. Default is #FFFFFF.
-         * @param {boolean} properties.textBold `true` to show the text as bold, `false` otherwise. Default is `false`.
-         * @param {boolean} properties.textItalics `true` to show the text as italics, `false` otherwise. Default is `false`.
+         * @param userID Identifier of the user to update the status item for.
+         * @param itemID Identifier of the status item to update.
+         * @param properties Properties of the object to update.
          */
-        updateStatusItem(userID, itemID, properties): void
+        updateStatusItem(userID: string, itemID: string, properties: MapItemProperties): void
 
         /**
          * Updates an existing top status icon.
-         * @param {string} userID Identifier of the user to update the top status icon for.
-         * @param {string} itemID Identifier of the top status icon to update.
-         * @param {object} properties Properties of the object to update.
+         * @param userID Identifier of the user to update the top status icon for.
+         * @param itemID Identifier of the top status icon to update.
+         * @param properties Properties of the object to update.
          */
-        updateTopStatusIcon(userID, itemID, properties): void
+        updateTopStatusIcon(userID: string, itemID: string, properties: MapItemProperties): void
 
         /**
          * Removes an object.
-         * @param {string} id Identifier of the object to remove.
-         * @param {object} options Options relating to the removal of the object.
-         * @param {boolean} options.clientOnly `true` if we only want to remove this object for this user, `false` if we want to remove it from the server.
+         * @param id Identifier of the object to remove.
+         * @param options Options relating to the removal of the object.
+         * @param options.clientOnly `true` if we only want to remove this object for this user, `false` if we want to remove it from the server. Default is `false`.
          */
-        remove(id, options): void
+        remove(id: string, options: { clientOnly: boolean = false }): void
 
         /**
          * Removes the status item that matches the given identifier.
-         * @param {string} userID Identifier of the user to remove the status item from.
-         * @param {string} itemID Identifier of the status item to remove.
+         * @param userID Identifier of the user to remove the status item from.
+         * @param itemID Identifier of the status item to remove.
          */
-        removeStatusItem(userID, itemID): void
+        removeStatusItem(userID: string, itemID: string): void
 
         /**
          * Removes the top status icon that matches the given identifier.
-         * @param {string} userID Identifier of the user to remove the top status icon from.
-         * @param {string} itemID Identifier of the top status icon to remove.
+         * @param userID Identifier of the user to remove the top status icon from.
+         * @param itemID Identifier of the top status icon to remove.
          */
-        removeTopStatusIcon(userID, itemID): void
+        removeTopStatusIcon(userID: string, itemID: string): void
 
-         /**
+        /**
          * Animates an object.
-         * @param {object} options Animation options.
-         * @param {string} options.target Identifier of the object to animate.
-         * @param {object} options.final Final properties of the object after the animation finishes.
-         * @param {string} options.field Field to animate.
-         * @param {any} options.value Final value to animate to.
-         * @param {number} options.duration Number of milliseconds to show the animation for.
-         * @param {number} options.delay Number of milliseconds to wait before starting the animation.
-         * @param {boolean} options.save `true` to save the final state (after the animation completes) to the database, `false` otherwise.
+         * @param options Options relating to the animation of the object.
          */
-        animate(options): void
+        animate(options: AnimateOptions): void
 
         /**
          * Converts from euler angles (in radians) to quaternion.
-         * @param {object} euler Euler angles to convert.
-         * @returns {object} Quaternion.
+         * @param euler Euler angles to convert.
+         * @returns Quaternion.
          */
-        eulerToQuat(euler): object
+        eulerToQuat(euler: Vector3): Quaternion
 
         /**
          * Converts from quaternion angles to euler in radians.
-         * @param {object} quat Quaternion angles to convert.
-         * @returns {object} Euler angles.
+         * @param quat Quaternion angles to convert.
+         * @returns Euler angles.
          */
-        quatToEuler(quat): object
-
-        /** Get properties of an object 
-         * @param id Identifier of the object to get animations for
-         * @returns {object} Properties of object associated with given identifier
-        */
-        get(id): object
-
-         /**
-         * Gets the rotation, as a quaternion, for the given object.
-         * @param {string} id Identifier of the object to get the rotation for.
-         * @returns {object} Rotation, as a quaternion, for the given object.
-         */
-        getRotationQuat(id): object
-
-         /**
-         * Gets the rotation, as Euler angles in radians, for the given object.
-         * @param {string} id Identifier of the object to get the rotation for.
-         * @returns {object} Rotation, as Euler angles in radians, for the given object.
-         */
-        getRotationEuler(id): object
-
-        /** Gets all the current component instances that exist */
-        getComponentInstances(): Array<any>
+        quatToEuler(quat: Quaternion): Vector3
 
         /**
-         * Fetch all objects within a radius.
-         * @param {number} x X coord of the center of the circle
-         * @param {number} y Y coord of the center of the circle
-         * @param {number} radius Radius of the circle.
-         * @returns {object[]} Array of objects.
+         * Gets the properties of an object.
+         * @param id Identifier of the object to get the properties for.
+         * @returns Properties of the object matching the given identifier.
          */
-        fetchInRadius(x, y, radius): Array<object>
+        get(id: string): MapItemProperties
 
-         /** Get animations of an object as a JSON string 
-          * @param {string} id Identifier of the object to get animations for.
-          * @returns {string} JSON string of all animations associated with this object
+        /**
+         * Gets the rotation, as a quaternion, for the given object.
+         * @param id Identifier of the object to get the rotation for.
+         * @returns Rotation, as a quaternion, for the given object.
          */
-        getAnimations(id): string
+        getRotationQuat(id: string): Quaternion
 
-         /**
-         * Register a component class so that it can be attached to objects.
-         * @param {Class} Cls The component class.
-         * @param {object} info Details about the component.
-         * @param {string} info.id The component ID.
-         * @param {string} info.name User readable name for this component.
-         * @param {string} info.description Description of the component.
-         * @param {string[]} info.only Types of objects that this component is allowed to attach to. Example: `['plane', 'circle']` to only allow this component to be attached to planes and circles.
-         * @param {boolean} info.serverTick If enabled, the plugin will run onServerTick() on the backend every 30 seconds. Note that much functionality will be missing in that environment.
-         * @param {array} info.settings An array describing the settings to show in the editor panel.
+        /**
+         * Gets the rotation, as Euler angles in radians, for the given object.
+         * @param id Identifier of the object to get the rotation for.
+         * @returns Rotation, as Euler angles in radians, for the given object.
          */
-        registerComponent(Cls, info): void
+        getRotationEuler(id: string): Vector3
+
+        /** @returns All the currently registered component instances. */
+        getComponentInstances(): ComponentInstance[]
+
+        /**
+         * Fetches all the objects within a radius.
+         * @param X Position in the x axis.
+         * @param y Position in the y axis.
+         * @param radius Radius around the given X and Y co-ordinates.
+         * @returns List of item properties that are within the given radius.
+         */
+        fetchInRadius(x: number, y: number, radius: number): MapItemProperties[]
+
+        /**
+         * Gets the animations of an object as a JSON string.
+         * @param id Identifier of the object to get animations for.
+         * @returns JSON string of all animations associated with this object.
+         */
+        getAnimations(id: string): string
+
+        /**
+         * Register a component so that it can be attached to objects.
+         * @param component Component to register.
+         * @param info Information about the component.
+         */
+        registerComponent(component: BaseComponent, info: ComponentInfo): void
 
         /**
          * Moves an object to a position.
-         * @param {object} taretPosition Position to move the object to.
-         * @param {string} objectID Identifier of the object.
-         * @param {string} speed Speed to move the object at.
-         * @returns {boolean} `true` if succesful, `false` otherwise.
+         * @param targetPosition Position to move the object to.
+         * @param speed Speed to move the object at.
+         * @param id Identifier of the object to move.
+         * @returns `true` if succesful, `false` otherwise.
          */
-        move(targetPosition, speed, objectID): boolean
+        move(targetPosition: Vector3, speed: number, id: string): boolean
 
         /**
-         * Set your user to follow an object
-         * @param {string} objectID ID of the object
-         * @param {string} speed Speed to move the object at
+         * Toggles your avatar to follow a user or object.
+         * @param id Identifier of the user or object that you would like to follow.
          */
-        toggleFollow(objectID): void
+        toggleFollow(id: string): void
 
-        /** Registers the specified animations with the system 
-         * @param {string} url URL of animations that you wish to register
+        /**
+         * Registers the specified animations with the system.
+         * @param url URL of the animations that you wish to register.
          */
-        registerAnimations(url): void
+        registerAnimations(url: string): void
 
     }
 
     /** Handles the manual creation of textures */
     class Textures {
 
-        /** Last texture ID */
-        lastID: number
-
-        /** Stored textures */
-        stored: {}
-
-        /** Constructor
-         * @param plugin reference to plugin
+        /**
+         * Creates a new texture. The `id` property of the OffscreenCanvas can be used as the `url` of an object.
+         * @param options Options for the texture.
+         * @returns Offscreen canvas element that can be drawn to.
          */
-        constructor(plugin)
-
-        /** 
-         * Create a new texture. Returns an OffscreenCanvas which can be drawn to. The OffscreenCanvas has an `id` property which can be used as the `url` of an object.
-         * 
-         * @param {object} options Texture options
-         * @param {number} options.width Width of the texture. Should be a power of 2.
-         * @param {number} options.height Height of the texture. Should be a power of 2.
-         * @returns {string} A texture ID
-         */
-        create(options): string
-
-        /** Update or commit texture changes 
-         * @param {string} id Identifier of the texture you want to update 
-         */
-        update(id): void
+        create(options: TextureOptions): OffscreenCanvas
 
         /**
-         * Remove a texture
-         * @param {string} id Identifier of the texture you want to remove
+         * Updates the texture matching the given identifier.
+         * @param id Identifier of the texture to update.
          */
-        remove(id): void
+        update(id: string): void
+
+        /**
+         * Removes a texture.
+         * @param id Identifier of the texture to remove.
+         */
+        remove(id: string): void
+
     }
 
     /** Handles the management of the user's position and appearance */
     class User {
 
-         /** List of registered avatars */
-        registeredAvatars: Array<any>
-
-        /** Constructor
-         * @param plugin reference to plugin
-         */
-        constructor(plugin)
-
         /** @returns Position of the current user */
-        getPosition(): object
+        getPosition(): Vector3
 
         /**
          * Sets the position of the current user.
-         * @param {number} x Position in the x direction.
-         * @param {number} y Position in the y direction.
-         * @param {number} z Position in the z direction.
-         * @param {boolean} instant `true` to move instantly to the given position, `false` to glide to the given position. Default is `false`.
-         * @param {boolean} keepFollow `true` to keep following the user you are currently following (if any), `false` to disconnect the follow. Default is `true`.
+         * @param x Position in the x direction.
+         * @param y Position in the y direction.
+         * @param z Position in the z direction.
+         * @param instant `true` to move instantly to the given position, `false` to glide to the given position. Default is `false`.
+         * @param keepFollow `true` to keep following the user you are currently following (if any), `false` to disconnect the follow. Default is `true`.
          */
-        setPosition(x, y, z, instant, keepFollow): void
+        setPosition(x: number, y: number, z: number, instant: boolean = false, keepFollow: boolean = true): void
 
         /**
-         * Get current user rotation.
-         * @param {boolean} deg `true` to return rotation in degrees, `false` to return in radians. Default is `false`.
-         * @returns {number} Rotation in radians (or degrees if `deg === true`).
+         * Gets the current user rotation.
+         * @param deg `true` to return rotation in degrees, `false` to return in radians. Default is `false`.
+         * @returns Rotation in radians (or degrees if `deg === true`).
          */
-        getRotation(deg): number
+        getRotation(deg: boolean = false): number
 
         /**
-         * Sets current user rotation.
-         * @param {number} r Rotation to set the user to.
-         * @param {boolean} deg `true` to indicate that the given rotation is in degrees, `false` to indicate that it is in radians. Default is `false`.
+         * Sets the current user rotation.
+         * @param r Rotation to set the user to.
+         * @param deg `true` to indicate that the given rotation is in degrees, `false` to indicate that it is in radians. Default is `false`.
          */
-        setRotation(r, deg): void
+        setRotation(r: number, deg: boolean = false): void
+
+        /**
+         * Gets the orientation of the current user.
+         * @param deg `true` to return the orientation in degrees, `false` to return in radians. Default is `false`.
+         * @returns Orientation of the current user.
+         */
+        getOrientation(deg: boolean = false): number
+
+        /**
+         * Sets the orientation of the current user.
+         * @param o Orientation to set for the current user.
+         * @param deg `true` to indicate that the given orientation is in degrees, `false` to indicate that it is in radians. Default is `false`.
+         */
+        setOrientation(o: number, deg: boolean = false): void
 
         /** Identifier of the current user */
         getID(): string
@@ -639,266 +882,231 @@ declare module 'vatom-spaces-plugins' {
         /** Display name of the current user */
         getDisplayName(): string
 
-        /** @returns {boolean} `true` if your user is following another user or object, `false` otherwise */
+        /** @returns `true` if your user is following another user or object, `false` otherwise */
         getFollow(): boolean
 
         /**
          * Set the current user to follow the user or object matching the given identifier.
-         * @param {string} id Identifier of the user or object to follow.
+         * @param id Identifier of the user or object to follow.
          */
-        setFollow(id): void
+        setFollow(id: string): void
 
-        /** Release your user from following a user or an object */
+        /** Release your user from following the currently followed user or object (if applicable). */
         releaseFollow(): void
 
         /**
-         * Get single user property.
-         * @param {string} userID The user's ID. Leave blank for the current user.
-         * @param {string} propertyName The name of the property to fetch. Prefix it with 'space:' to store for this space only.
-         * @returns {any} Property value, or `null` if something went wrong.
+         * Gets a property from a user specific to this plugin.
+         * @param id Identifier of the user to get the property for. Leave blank for the current user.
+         * @param propertyName Name of the property to fetch. Prefix it with 'space:' to get it for this space only.
+         * @returns Property value, or `null` if something went wrong.
          */
-        getProperty(userID , propertyName): any
+        getProperty(id?: string, propertyName?: string): any
 
-         /**
-         * Get user properties specific to this plugin.
-         * @param {string} userID Identifier of the user to get properties from. Leave blank for the current user.
-         * @returns {any} Properties for the given user, or `null` if something went wrong.
+        /**
+         * Gets user properties specific to this plugin.
+         * @param id Identifier of the user to get properties from. Leave blank for the current user.
+         * @returns Properties for the given user, or `null` if something went wrong.
          */
-        getProperties(userID): object
+        getProperties(id?: string): {}
 
-        /** Set user properties specific to this plugin 
-         * @param {object} props Properties you wish to set
-        */
-        setProperties(props): void
+        /**
+         * Sets user properties specific to this plugin.
+         * @param props Properties to set.
+         */
+        setProperties(props: {}): void
 
         /** `true` if the current user is an admin in this space, `false` otherwise */
         isAdmin(): boolean
 
-        /** Register a new avatar 
-         * 
-         * Fields include:
-         * - `avatar.id`: identifier of avatar (Mandatory)
-         * - `avatar.name`: name of avatar (Mandatory)
-         * - `avatar.type`: type of avatar (Mandatory)
-         * - `avatar.modelURL`: 3D model of avatar (Mandatory)
-         * - `avatar.properties`: object containing all avatar properties (Optional)
-         * 
-         * @param {object} avatar Avatar information used to register new avatar
-        */
-        registerAvatar(avatar): void
-
-        /** Remove a registered avatar 
-         * @param {string} id Identifier of avatar you wish to remove
-        */
-        unregisterAvatar(id): void
-
-        /** Get current user's avatar data, or null if using the default avatar. */
-        getAvatarData(): any
-
-        /** Asks the user to immediately switch to the specified avatar data. Returns false if the user denied the change request.
-         * @param {object} avatar Avatar object you wish to set new data for
+        /**
+         * Registers a new avatar.
+         * @param avatar Information about the avatar to register.
          */
-        setAvatarData(avatar): void
+        registerAvatar(avatar: AvatarData): void
 
         /**
-         * Override the avatar's current animation. Note that for all animation names, don't include the skeleton name. For example if you
-         * want to play a walk animation, specify `"walk"` and not `"humanoid.walk"`. The animation prefix will be automatically added based
-         * on which type of avatar the current user is using.
-         * @param {object} options An object describing how to override the animations. Specify `null` to cancel any current animations.
-         * @param {string} options.animation_start Optional. Name of the animation to play before the main animation, without the skeleton name.
-         * @param {string} options.animation Name of the animation to play, without the skeleton name.
-         * @param {string} options.animation_end Optional. Name of the animation to play when ending the override, without the skeleton name.
-         * @param {number} options.loop Optional. Amount of times to play the animation for. Default = 1. Specify `true` to loop forever.
-         * @param {object} options.fixed_movement Optional. If specified, will lock the avatar into moving at this fixed speed per second. Object must contain an `x`, `y`, and `z` field. The user won't be able to move their avatar while the animation is running. Specify `{ x: 0, y: 0, z: 0 }` to lock the avatar in place.
-         * @param {boolean} options.cancel_mode Optional. Can be `"smooth"` (default) to wait for the animation cycle to complete, `"immediate"` to cancel the animation immediately when the user moves, or `"none"` to not allow the user to cancel movement.
-         * @param {boolean} options.merge Optional. If true, will merge the animation with the default animations for walk, run, etc.
-         * @returns {Promise<boolean>} Returns a promise for when the animation ends. True if the animation ended normally, or false if it was interrupted.
+         * Removes a registered avatar.
+         * @param id Identifier of the avatar you wish to remove.
          */
-        overrideAvatarAnimation(options): Promise<boolean>
+        unregisterAvatar(id: string): void
 
-         /** Gets location of specified user
-         * @param {string} id Identifier of user you wish to get location of
-         * @returns {object} Location of a user that matches the given identifier 
-         */
-        getUserLocation(id): object
+        /** @returns Avatar data for the current user, or `null` if using the default avatar. */
+        getAvatarData(): AvatarData | null
 
         /**
-         * Get nearby users list with positions.
-         * @param {number} maxDistance Maximum distance away to search for users.
-         * @returns {object[]} List of users that were found.
+         * Asks the user to immediately switch to the specified avatar data.
+         * Returns `false` if the user denied the change request.
+         * @param avatar Avatar you wish to set new data for.
          */
-        getNearbyUsers(maxDistance)
+        setAvatarData(avatar: AvatarData): void
 
-        /** Fetch user's identities of a certain type 
-         * @param {string} type type of avatar to fetch identities for
-         * @returns {string[]} List of avatar identities who have the same specified type
-        */
-        getIdentities(type): Array<string>
-
-        /** Query to the Allowl API, returns the response.
-         * @param {object} query Query payload you are passing to the Allowl API
-         * @returns {object} Response from the Allowl API based on passed query
+        /**
+         * Override the avatar's current animation. Note that for all animation
+         * names, don't include the skeleton name. For example if you want to
+         * play a walk animation, specify `"walk"` and not `"humanoid.walk"`.
+         * The animation prefix will be automatically added based on which type
+         * of avatar the current user is using.
+         * @param options Options describing how to override the animations. Specify `null` to cancel any current animations.
+         * @returns `true` if the animation ended normally, `false` if it was interrupted.
          */
-        queryAllowlPermission(query): object
+        overrideAvatarAnimation(options?: AnimationOverrideOptions): Promise<boolean>
 
-        /** Show a shut down screen for user 
-         * @param {string} message Message you wish to display on the shut down screen
-         * @param {string} title Title you wish to display on the shut down screen
-         * @param {string} buttonText Text of the button shown on the shut down screen. Default is "Try again"
-         * @param {function} buttonAction Action you wish the shut down screen button to take when clicked. Default is `e => location.reload()` which refreshes the page.
+        /**
+         * Gets the location of a user matching the given identifier.
+         * @param id Identifier of user you wish to get location for.
+         * @returns Location of a user that matches the given identifier, or `null` if no such user was found.
          */
-        showShutDownScreen(message, title, buttonText, buttonAction): void
+        getUserLocation(id: string): Vector3 | null
 
-        /** Shows the selection screen for a user avatar */
+        /**
+         * Gets a list of nearby users.
+         * @param maxDistance Maximum distance away, in metres, to search for users. If no value is specified, all users within rendering range will be returned.
+         * @returns List of users that were found.
+         */
+        getNearbyUsers(maxDistance?: number): UserData[]
+
+        /**
+         * Show a shut down screen for user.
+         * @param message Message you wish to display on the shut down screen.
+         * @param title Title you wish to display on the shut down screen.
+         * @param buttonText Text of the button shown on the shut down screen. Default is "Try again".
+         * @param buttonAction Action you wish the shut down screen button to take when clicked. Default is `e => location.reload()`.
+         */
+        showShutDownScreen(message: string, title: string, buttonText?: string, buttonAction?: (evt) => void): void
+
+        /** Shows the selection screen for a user avatar. */
         showAvatarSelectPopup(): void
 
-        /** Send a generic analytics event 
-         * @param {string} name Name of the event
-         * @param {any} value Value associated with given name
-        */
-        sendAnalytics(name, value): void
+        /**
+         * Send a generic analytics event.
+         * @param name Name of the event.
+         * @param value Value associated with given name.
+         */
+        sendAnalytics(name: string, value: any): void
 
     }
 
     /** Handles interaction with the world */
     class World {
-        
-        /** Constructor
-         * @param plugin reference to plugin
-         */
-        constructor(plugin)
-        
-        /** @returns {string} Full world ID */
+
+        /** @returns Identifier for this space. */
         getID(): string
 
-        /** @returns {string} World instance ID */
+        /** @returns Identifier for this space instance. */
         getInstanceID(): string
 
-        /** @returns {string} Unique session ID for the current session */
+        /** @returns Unique session identifier for the current session. */
         getSessionID(): string
 
-        /** @returns {Promise<string>} Name of the space the user is currently in */
+        /** @returns Name of the space the user is currently in. */
         getSpaceName(): Promise<string>
 
-         /**
-         * Perform a raycast and return the MapItem IDs of the hit object(s).
-         *
-         * @param {object} options An optional list of options for the raycast.
-         * @param {Vector2} screenPosition If specified, an X and Y value from 0 to 1 determining the coordinate on the screen. Use `{x: 0.5, y: 0.5}` to pick from the center of the screen.
-         * @param {Vector3} worldPosition If specified, the start of the ray in 3D space.
-         * @param {Vector3} worldDirection The direction of the ray. Ignored if using `screenPosition`.
-         * @param {number} length The length of the ray. Default = infinity.
-         * @param {boolean} collision If true, only hit collision enabled items.
-         * @returns {object[]} Each returned object contains a `id` (MapItem ID string), `point` (Vector3), `faceNormal` (Vector3), `faceNormalAdjusted` (Vector3), `distance` (number), `wallProps` (object)
+        /**
+         * Performs a raycast and returns the hit object(s).
+         * @param options Configurable options for the raycast.
+         * @returns Object(s) that have been hit by the raycast.
          */
-        raycast(options): Array<object>
-
+        raycast(options?: RaycastOptions): RaycastHit[]
 
     }
 
     /** Handles interaction with the storage system */
     class StorageComponent {
-        
-        /** Constructor
-         * @param plugin reference to plugin
+
+        /**
+         * Puts a file into storage and returns the URL to the item.
+         * @param bucket Storage bucket to put item in.
+         * @param path Path of where in the bucket you wish to store the item.
+         * @param url URL of the item you are storing.
+         * @returns Storage URL of the item you just stored, or `null` something went wrong.
          */
-        constructor(plugin)
+        put(bucket: BucketType, path: string, url: string): Promise<string> | null
 
-        /** Put a file into storage and return the URL to the item 
-         * @param {string} bucket Storage bucket to put item in. Options: `space`, `server`, `user`.
-         * @param {string} path Path of where in the bucket you wish to store the item
-         * @param {string} url url of item you are storing
-         * @returns {Promise<string>} Storage URL of the item you just stored. null if process failed.
-        */
-        put(bucket, path, url): Promise<string>
+        /**
+         * Gets the URL of a file in storage.
+         * @param bucket Storage bucket which the item belongs to.
+         * @param path Path of item inside storage.
+         * @returns Storage URL of the item found, or `null` if nothing is found.
+         */
+        getURL(bucket: BucketType, path: string): Promise<string>
 
-        /** Get URL of a file in storage 
-         * @param bucket Storage bucket which item belongs to
-         * @param path Path of item inside storage
-         * @returns {Promise<string>} Storage URL of the item found. null if nothing is found.
-        */
-        getURL(bucket, path): Promise<string>
     }
 
-     /** Represents a plugin component that is attached to an object. */
-     class BaseComponent {
+    /** Represents a plugin component that is attached to an object. */
+    class BaseComponent {
 
-        /** Reference to plugin */
-        plugin: any
+        /** Reference to the plugin */
+        plugin: BasePlugin
 
-        /** ID of this component */
+        /** Identifier of this component */
         componentID: string
 
-        /** ID of the object this component is associated with */
+        /** Identifier of the object this component is associated with */
         objectID: string
 
-        /** The map item that this component is attached to. */
-        mapItem: any
+        /** Map item that this component is attached to */
+        mapItem: MapItem
 
         /** Current object fields */
-        fields: object
-
-        /** Constructor */
-        constructor()
+        fields: {}
 
         /** Called when the object is loaded */
         onLoad(): void
 
-        /** Called when the object is removed or component is uninstalled */
+        /** Called when the object is deleted or the component is uninstalled */
         onUnload(): void
 
-        /** Called when the object's fields changed 
-          * @param newFields updated fields
+        /**
+         * Called when the fields have changed for this object.
+         * @param newFields Updated fields.
          */
-        onObjectUpdated(newFields): void
+        onObjectUpdated(newFields: {}): void
 
         /**
          * Called when the user clicks on the object.
-         * @param {object} event An object describing the event
-         * @param {THREE.Vector3} event.position The x, y and z coordinates of the click hit point in world space
-         * @param {THREE.Vector2} event.uv The X and Y values on the UV that was hit. This can be used to calculate where on a plane or shape the click happened, eg `x = uv.x * screenWidth`
+         * @param event Click event information for the object.
          */
-        onClick(event): void
+        onClick(event: ComponentClickEvent): void
 
         /**
-         * Gets component configuration field
-         * @param {string} id ID of field
-         * @returns {any} value of configuration field attached to given name
+         * Gets a component configuration field.
+         * @param id Identifier of the field to get the value for.
+         * @returns Value of the field matching the given identifier.
          */
-        getField(id): any
+        getField(id: string): any
 
         /**
-         * Sets component configuration field (only admins can successfully do this)
-         * @param {string} id ID of field
-         * @param {any} value Value to set field to
+         * Sets a component configuration field (only admins can successfully do this)
+         * @param id Identifier of the field to set.
+         * @param value Value to set the field to.
          */
-        setField(id, value): void
+        setField(id: string, value: any): void
 
         /**
          * Sets multiple fields at once (only admins can successfully do this)
-         * @param {object} fields Fields to set
+         * @param fields Fields to set.
          */
-        setFields(fields): void
-
-        /** Send a message to all instances of this component on other devices.
-         * @param {object} msg The message to send.
-         * @param {boolean} isGlobal If true, will send to everyone on the server instead of just everyone within rendering range.
-         * @param {string} targetUserID If specified, sends a message to a specific user, independent of where that user is.
-         */
-        sendMessage(msg, isGlobal, targetUserID): void
+        setFields(fields: {}): void
 
         /**
-         * Send a message to all instances of this component, The first truthy response from onRequest(msg) will be returned.
-         * 
-         * @param {object} msg The message to send.
-         * @param {bool} isGlobal If true, will send to everyone on the entire server instead of just everyone within rendering range.
-         * @param {string} targetUserID If specified, sends a message to a specific user, independent of where that user is.
-         * @returns {Promise<*>} The response.
+         * Send a message to all instances of this component on other devices.
+         * @param msg Message to send.
+         * @param isGlobal `true` to send to everyone on the entire server, `false` to send to everyone within rendering range. Default is `false`.
+         * @param targetUserID If given, it is the identifier of a user to send a message to (regardless of where that user is). Default is ''.
          */
-        sendRequest(msg, isGlobal, targetUserID): Promise<any>
+        sendMessage(msg: any, isGlobal: boolean = false, targetUserID: string = ''): void
+
+        /**
+         * Send a message to all instances of this component on other devices. The first truthy response from the `onRequest(msg)` method will be returned.
+         * @param msg Message to send.
+         * @param isGlobal `true` to send to everyone on the entire server, `false` to send to everyone within rendering range. Default is `false`.
+         * @param targetUserID If given, it is the identifier of a user to send a message to (regardless of where that user is). Default is ''.
+         * @returns Response from the request.
+         */
+        sendRequest(msg: any, isGlobal: boolean = false, targetUserID: string = ''): Promise<any>
 
     }
 
-    export = {BasePlugin, BaseComponent}
+    export = { BasePlugin, BaseComponent }
 
 }
