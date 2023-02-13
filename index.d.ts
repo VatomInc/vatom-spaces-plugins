@@ -80,7 +80,9 @@ declare module 'vatom-spaces-plugins' {
         /** Width of the panel. Default is 320 pixels. */
         width?: number,
         /** Maximum height (in pixels) that the panel should be. Defaults to the height of the content inside. */
-        maxHeight?: number
+        maxHeight?: number,
+        /** When using the "plugin-settings" section, these are the settings used. */
+        fields?: ComponentSettings[]
     }
 
     /** Represents a menu item that can be registered */
