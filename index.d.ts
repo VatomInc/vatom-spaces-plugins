@@ -812,7 +812,7 @@ declare module 'vatom-spaces-plugins' {
          * @param id Identifier of the object to send a click to.
          * @returns `true` if the click was sent to the object, `false` otherwise.
          */
-        sendClick(id: string): boolean
+        sendClick(id: string): Promise<boolean>
 
         /**
          * Registers the specified animations with the system.
