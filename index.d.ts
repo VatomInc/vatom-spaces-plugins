@@ -121,6 +121,46 @@ declare module 'vatom-spaces-plugins' {
         panel: MenuPanel
     }
 
+    /** Options for a promp popup */
+    interface PromptOptions {
+        /** Icon to show. */
+        icon?: PopupIcon,
+        /** Title of the prompt. Default is the name of the plugin. */
+        title?: string,
+        /** Text to display. */
+        text?: string,
+        /** Type of input to show. */
+        inputType?: "text" | "textarea" | "email" | "password" | "number" | "tel" | "url",
+        /** Initial value to display in the input. */
+        initialValue?: string,
+        /** Placeholder text to show when no value is specified. */
+        placeholder?: string
+    }
+
+    /** Options for a Toast message */
+    interface ToastOptions {
+        /** Icon to display on the left of the message. */
+        icon?: string,
+        /** Text to display. */
+        text?: string,
+        /** Color of the text. */
+        textColor?: string,
+        /** Duration to show the message for. */
+        duration?: number,
+        /** `true` if the message should not automatically close, `false` otherwise. */
+        isSticky?: boolean,
+        /** Color of the action and cancel button text. */
+        buttonColor?: string,
+        /** Text to display on an action button to the right of the message. */
+        buttonText?: string,
+        /** Function to execute when the action button is clicked. */
+        buttonAction?: () => {},
+        /** Text to display on a cancel button to the right of the message. */
+        buttonCancelText?: string,
+        /** Function to execute when the cancel button is clicked. */
+        buttonCancelAction?: () => {}
+    }
+
     /** Item to show as a popup. */
     interface PopupItem {
         /** Title of the popup. */
@@ -368,6 +408,9 @@ declare module 'vatom-spaces-plugins' {
     /** Callback function for a hook */
     type HookCallback = (data: any) => any
 
+    /** Type of icon to use in a popup */
+    type PopupIcon = "info" | "success" | "question" | "error" | "warning"
+
     /** Type of bucket to use when interfacing with storage */
     type BucketType = "space" | "server" | "user"
 
@@ -472,7 +515,7 @@ declare module 'vatom-spaces-plugins' {
          * @param id Identifier of the field to set.
          * @param value Value to set the field to.
          */
-        setField(id: string, value: any): void
+        setField(id: string, value: any): Promise<void>
 
         /**
          * Gets the component field for a given object.
@@ -489,23 +532,17 @@ declare module 'vatom-spaces-plugins' {
     class AppComponent {
 
         /**
-         * Requests the platform to use this plugin in a trusted environment.
-         * @returns `true` if this plugin is allowed to be used in a trusted environment, `false` otherwise.
-         */
-        requestTrustedSwitch(): boolean
-
-        /**
          * Gets details about the plugin if it has been loaded, otherwise it returns `null`.
          * @param id Identifier of the plugin to get details for.
          */
-        getPluginDetails(id: string): PluginDetails
+        getPluginDetails(id: string): Promise<PluginDetails>
 
         /**
          * Checks if the given object has its input captured by a plugin.
          * @param id Identifier of the object that should be checked.
          * @returns `true` if this object has its input captured, `false` otherwise.
          */
-        hasInputCapture(id: string): boolean
+        hasInputCapture(id: string): Promise<boolean>
 
         /**
          * Request full input event capture. While capture is active, all keyboard and pointer events will be sent
@@ -518,10 +555,10 @@ declare module 'vatom-spaces-plugins' {
          * @param id Identifier of the object to capture input for.
          * @param callback Function to execute when receiving an event.
          */
-        requestInputCapture(id: string, callback: InputCaptureCallback): void
+        requestInputCapture(id: string, callback: InputCaptureCallback): Promise<void>
 
         /** Stops the current input capture, if any. */
-        stopInputCapture(): void
+        stopInputCapture(): Promise<void>
 
     }
 
@@ -540,7 +577,7 @@ declare module 'vatom-spaces-plugins' {
          * @param options Options relating to the playback.
          * @returns Identifier of the audio source that is being played, or `null` if something went wrong.
          */
-        play(url: string, options: AudioOptions): Promise<string> | null
+        play(url: string, options: AudioOptions): Promise<string | null>
 
         /**
          * Stops playing an audio source with the matching identifier.
@@ -558,14 +595,14 @@ declare module 'vatom-spaces-plugins' {
          * @param name Name of the hook.
          * @param callback Function to be called. If this function returns a truthy value, the hook is interrupted.
          */
-        addHandler(name: string, callback: HookCallback): void
+        addHandler(name: string, callback: HookCallback): Promise<void>
 
         /**
          * Removes a hook event handler.
          * @param name Name of the hook.
          * @param callback Function that was used for the hook.
          */
-        removeHandler(name: string, callback: HookCallback): void
+        removeHandler(name: string, callback: HookCallback): Promise<void>
 
         /**
          * Triggers a hook that matches the given name. If any handler returns a
@@ -590,30 +627,75 @@ declare module 'vatom-spaces-plugins' {
     class Menus {
 
         /**
+         * Displays a message in a popup.
+         * @param text Text to display.
+         * @param title Title of the message. Default is the name of the plugin.
+         * @param icon Icon to show. Default is "info".
+         */
+        alert(text: string, title: string, icon: PopupIcon): Promise<void>
+
+        /**
+         * Asks the user for text input.
+         * @param options Prompt options.
+         * @returns Text that the user entered, or `null` if the user cancelled.
+         */
+        prompt(options: PromptOptions): Promise<string | null>
+
+        /**
+         * Displays a Toast message near the bottom of the screen.
+         * @param options Toast options.
+         * @returns Identifier of the Toast message.
+         */
+        toast(options: ToastOptions): Promise<string>
+
+        /**
+         * Closes the Toast message that matches the given identifier.
+         * @param id Identifier of the Toast message to close.
+         */
+        closeToast(id: string): Promise<void>
+
+        /**
+         * Displays a popup.
+         * @param options Popup configuration options.
+         * @returns Identifier of the popup.
+         */
+        displayPopup(options: PopupItem): Promise<string>
+
+        /**
+         * Closes the popup that matches the given identifier.
+         * @param id Identifier of the popup to close.
+         */
+        closePopup(id: string): Promise<void>
+
+        /**
          * Registers a new menu item.
          * @param options Menu options.
          * @returns Identifier for the menu item.
          */
-        register(options: MenuItem): string
+        register(options: MenuItem): Promise<string>
 
         /**
          * Updates the fields for the given menu item.
          * @param id Identifier of the menu item to update.
          * @param changes Changes to make to the menu item.
          */
-        update(id: string, changes: MenuItem): void
+        update(id: string, changes: MenuItem): Promise<void>
 
         /**
          * Unregisters an existing menu item.
          * @param id Identifier for the menu item to unregister.
          */
-        unregister(id: string): void
+        unregister(id: string): Promise<void>
 
         /**
-         * Displays a popup.
-         * @param options Popup configuration options.
+         * Sends a message to any open iframe panels. A panel can listen for these
+         * messages by using the `"onmessage"` window event.
+         * @param data Data to pass on.
          */
-        displayPopup(options: PopupItem): void
+        postMessage(data: any): Promise<void>
+
+        /** Returns focus to the Space. */
+        returnFocus(): void
 
     }
 
@@ -654,7 +736,7 @@ declare module 'vatom-spaces-plugins' {
          * @param options Options relating to the object to create.
          * @returns Identifier of the object that has been created.
          */
-        create(options: MapItemProperties): string
+        create(options: MapItemProperties): Promise<string>
 
         /**
          * Creates a status item that appears above a user's avatar. Will always be
@@ -663,7 +745,7 @@ declare module 'vatom-spaces-plugins' {
          * @param properties Properties of the status item to create.
          * @returns Identifier of the status item that has been created, or `null` if some issue occurred.
          */
-        createStatusItem(options: StatusOptions, properties: MapItemProperties): string | null
+        createStatusItem(options: StatusOptions, properties: MapItemProperties): Promise<string | null>
 
         /**
          * Creates a top status icon that appears above a user's avatar. Will always be
@@ -672,7 +754,7 @@ declare module 'vatom-spaces-plugins' {
          * @param properties Properties of the top status icon to create.
          * @returns Identifier of the top status icon that has been created, or `null` if some issue occurred.
          */
-        createTopStatusIcon(options: StatusOptions, properties: MapItemProperties): string | null
+        createTopStatusIcon(options: StatusOptions, properties: MapItemProperties): Promise<string | null>
 
         /**
          * Updates an existing object.
@@ -688,7 +770,7 @@ declare module 'vatom-spaces-plugins' {
          * @param itemID Identifier of the status item to update.
          * @param properties Properties of the object to update.
          */
-        updateStatusItem(userID: string, itemID: string, properties: MapItemProperties): void
+        updateStatusItem(userID: string, itemID: string, properties: MapItemProperties): Promise<void>
 
         /**
          * Updates an existing top status icon.
@@ -696,7 +778,7 @@ declare module 'vatom-spaces-plugins' {
          * @param itemID Identifier of the top status icon to update.
          * @param properties Properties of the object to update.
          */
-        updateTopStatusIcon(userID: string, itemID: string, properties: MapItemProperties): void
+        updateTopStatusIcon(userID: string, itemID: string, properties: MapItemProperties): Promise<void>
 
         /**
          * Removes an object.
@@ -704,62 +786,62 @@ declare module 'vatom-spaces-plugins' {
          * @param options Options relating to the removal of the object.
          * @param options.clientOnly `true` if we only want to remove this object for this user, `false` if we want to remove it from the server. Default is `false`.
          */
-        remove(id: string, options: { clientOnly: boolean = false }): void
+        remove(id: string, options: { clientOnly: boolean = false }): Promise<void>
 
         /**
          * Removes the status item that matches the given identifier.
          * @param userID Identifier of the user to remove the status item from.
          * @param itemID Identifier of the status item to remove.
          */
-        removeStatusItem(userID: string, itemID: string): void
+        removeStatusItem(userID: string, itemID: string): Promise<void>
 
         /**
          * Removes the top status icon that matches the given identifier.
          * @param userID Identifier of the user to remove the top status icon from.
          * @param itemID Identifier of the top status icon to remove.
          */
-        removeTopStatusIcon(userID: string, itemID: string): void
+        removeTopStatusIcon(userID: string, itemID: string): Promise<void>
 
         /**
          * Animates an object.
          * @param options Options relating to the animation of the object.
          */
-        animate(options: AnimateOptions): void
+        animate(options: AnimateOptions): Promise<void>
 
         /**
          * Converts from euler angles (in radians) to quaternion.
          * @param euler Euler angles to convert.
          * @returns Quaternion.
          */
-        eulerToQuat(euler: Vector3): Quaternion
+        eulerToQuat(euler: Vector3): Promise<Quaternion>
 
         /**
          * Converts from quaternion angles to euler in radians.
          * @param quat Quaternion angles to convert.
          * @returns Euler angles.
          */
-        quatToEuler(quat: Quaternion): Vector3
+        quatToEuler(quat: Quaternion): Promise<Vector3>
 
         /**
          * Gets the properties of an object.
          * @param id Identifier of the object to get the properties for.
          * @returns Properties of the object matching the given identifier.
          */
-        get(id: string): MapItemProperties
+        get(id: string): Promise<MapItemProperties>
 
         /**
          * Gets the rotation, as a quaternion, for the given object.
          * @param id Identifier of the object to get the rotation for.
          * @returns Rotation, as a quaternion, for the given object.
          */
-        getRotationQuat(id: string): Quaternion
+        getRotationQuat(id: string): Promise<Quaternion>
 
         /**
          * Gets the rotation, as Euler angles in radians, for the given object.
          * @param id Identifier of the object to get the rotation for.
          * @returns Rotation, as Euler angles in radians, for the given object.
          */
-        getRotationEuler(id: string): Vector3
+        getRotationEuler(id: string): Promise<Vector3>
 
         /** @returns All the currently registered component instances. */
         getComponentInstances(): ComponentInstance[]
@@ -771,14 +853,14 @@ declare module 'vatom-spaces-plugins' {
          * @param radius Radius around the given X and Y co-ordinates.
          * @returns List of item properties that are within the given radius.
          */
-        fetchInRadius(x: number, y: number, radius: number): MapItemProperties[]
+        fetchInRadius(x: number, y: number, radius: number): Promise<MapItemProperties[]>
 
         /**
          * Gets the animations of an object as a JSON string.
          * @param id Identifier of the object to get animations for.
          * @returns JSON string of all animations associated with this object.
          */
-        getAnimations(id: string): string
+        getAnimations(id: string): Promise<string>
 
         /**
          * Register a component so that it can be attached to objects.
@@ -806,7 +888,7 @@ declare module 'vatom-spaces-plugins' {
          * Registers the specified animations with the system.
          * @param url URL of the animations that you wish to register.
          */
-        registerAnimations(url: string): void
+        registerAnimations(url: string): Promise<void>
 
     }
 
@@ -818,19 +900,19 @@ declare module 'vatom-spaces-plugins' {
          * @param options Options for the texture.
          * @returns Offscreen canvas element that can be drawn to.
          */
-        create(options: TextureOptions): OffscreenCanvas
+        create(options: TextureOptions): Promise<OffscreenCanvas>
 
         /**
          * Updates the texture matching the given identifier.
          * @param id Identifier of the texture to update.
          */
-        update(id: string): void
+        update(id: string): Promise<void>
 
         /**
          * Removes a texture.
          * @param id Identifier of the texture to remove.
          */
-        remove(id: string): void
+        remove(id: string): Promise<void>
 
     }
 
@@ -838,7 +920,7 @@ declare module 'vatom-spaces-plugins' {
     class User {
 
         /** @returns Position of the current user */
-        getPosition(): Vector3
+        getPosition(): Promise<Vector3>
 
         /**
          * Sets the position of the current user.
@@ -848,44 +930,47 @@ declare module 'vatom-spaces-plugins' {
          * @param instant `true` to move instantly to the given position, `false` to glide to the given position. Default is `false`.
          * @param keepFollow `true` to keep following the user you are currently following (if any), `false` to disconnect the follow. Default is `true`.
          */
-        setPosition(x: number, y: number, z: number, instant: boolean = false, keepFollow: boolean = true): void
+        setPosition(x: number, y: number, z: number, instant: boolean = false, keepFollow: boolean = true): Promise<void>
 
         /**
          * Gets the current user rotation.
          * @param deg `true` to return rotation in degrees, `false` to return in radians. Default is `false`.
          * @returns Rotation in radians (or degrees if `deg === true`).
          */
-        getRotation(deg: boolean = false): number
+        getRotation(deg: boolean = false): Promise<number>
 
         /**
          * Sets the current user rotation.
          * @param r Rotation to set the user to.
          * @param deg `true` to indicate that the given rotation is in degrees, `false` to indicate that it is in radians. Default is `false`.
          */
-        setRotation(r: number, deg: boolean = false): void
+        setRotation(r: number, deg: boolean = false): Promise<void>
 
         /**
          * Gets the orientation of the current user.
          * @param deg `true` to return the orientation in degrees, `false` to return in radians. Default is `false`.
          * @returns Orientation of the current user.
          */
-        getOrientation(deg: boolean = false): number
+        getOrientation(deg: boolean = false): Promise<number>
 
         /**
          * Sets the orientation of the current user.
          * @param o Orientation to set for the current user.
          * @param deg `true` to indicate that the given orientation is in degrees, `false` to indicate that it is in radians. Default is `false`.
          */
-        setOrientation(o: number, deg: boolean = false): void
+        setOrientation(o: number, deg: boolean = false): Promise<void>
 
-        /** Identifier of the current user */
-        getID(): string
+        /** @returns Identifier of the current user */
+        getID(): Promise<string>
 
-        /** Display name of the current user */
-        getDisplayName(): string
+        /** @returns Display name of the current user */
+        getDisplayName(): Promise<string>
+
+        /** @returns `true` if this user is an admin in the space, `false` otherwise */
+        isAdmin(): Promise<boolean>
 
         /** @returns `true` if your user is following another user or object, `false` otherwise */
-        getFollow(): boolean
+        getFollow(): Promise<boolean>
 
         /**
          * Set the current user to follow the user or object matching the given identifier.
@@ -894,7 +979,7 @@ declare module 'vatom-spaces-plugins' {
         setFollow(id: string): void
 
         /** Release your user from following the currently followed user or object (if applicable). */
-        releaseFollow(): void
+        releaseFollow(): Promise<void>
 
         /**
          * Gets a property from a user specific to this plugin.
@@ -902,45 +987,42 @@ declare module 'vatom-spaces-plugins' {
          * @param propertyName Name of the property to fetch. Prefix it with 'space:' to get it for this space only.
          * @returns Property value, or `null` if something went wrong.
          */
-        getProperty(id?: string, propertyName?: string): any
+        getProperty(id?: string, propertyName?: string): Promise<any | null>
 
         /**
          * Gets user properties specific to this plugin.
          * @param id Identifier of the user to get properties from. Leave blank for the current user.
          * @returns Properties for the given user, or `null` if something went wrong.
          */
-        getProperties(id?: string): {}
+        getProperties(id?: string): Promise<any | null>
 
         /**
          * Sets user properties specific to this plugin.
          * @param props Properties to set.
          */
-        setProperties(props: {}): void
-
-        /** `true` if the current user is an admin in this space, `false` otherwise */
-        isAdmin(): boolean
+        setProperties(props: {}): Promise<void>
 
         /**
          * Registers a new avatar.
          * @param avatar Information about the avatar to register.
          */
-        registerAvatar(avatar: AvatarData): void
+        registerAvatar(avatar: AvatarData): Promise<void>
 
         /**
          * Removes a registered avatar.
          * @param id Identifier of the avatar you wish to remove.
          */
-        unregisterAvatar(id: string): void
+        unregisterAvatar(id: string): Promise<void>
 
         /** @returns Avatar data for the current user, or `null` if using the default avatar. */
-        getAvatarData(): AvatarData | null
+        getAvatarData(): Promise<AvatarData | null>
 
         /**
          * Asks the user to immediately switch to the specified avatar data.
          * Returns `false` if the user denied the change request.
          * @param avatar Avatar you wish to set new data for.
          */
-        setAvatarData(avatar: AvatarData): void
+        setAvatarData(avatar: AvatarData): Promise<boolean | void>
 
         /**
          * Override the avatar's current animation. Note that for all animation
@@ -958,14 +1040,14 @@ declare module 'vatom-spaces-plugins' {
          * @param id Identifier of user you wish to get location for.
          * @returns Location of a user that matches the given identifier, or `null` if no such user was found.
          */
-        getUserLocation(id: string): Vector3 | null
+        getUserLocation(id: string): Promise<Vector3 | null>
 
         /**
          * Gets a list of nearby users.
          * @param maxDistance Maximum distance away, in metres, to search for users. If no value is specified, all users within rendering range will be returned.
          * @returns List of users that were found.
          */
-        getNearbyUsers(maxDistance?: number): UserData[]
+        getNearbyUsers(maxDistance?: number): Promise<UserData[]>
 
         /**
          * Show a shut down screen for user.
@@ -974,17 +1056,17 @@ declare module 'vatom-spaces-plugins' {
          * @param buttonText Text of the button shown on the shut down screen. Default is "Try again".
          * @param buttonAction Action you wish the shut down screen button to take when clicked. Default is `e => location.reload()`.
          */
-        showShutDownScreen(message: string, title: string, buttonText?: string, buttonAction?: (evt) => void): void
+        showShutDownScreen(message: string, title: string, buttonText?: string, buttonAction?: (evt) => void): Promise<void>
 
         /** Shows the selection screen for a user avatar. */
-        showAvatarSelectPopup(): void
+        showAvatarSelectPopup(): Promise<void>
 
         /**
          * Send a generic analytics event.
          * @param name Name of the event.
          * @param value Value associated with given name.
          */
-        sendAnalytics(name: string, value: any): void
+        sendAnalytics(name: string, value: any): Promise<void>
 
     }
 
@@ -992,13 +1074,13 @@ declare module 'vatom-spaces-plugins' {
     class World {
 
         /** @returns Identifier for this space. */
-        getID(): string
+        getID(): Promise<string>
 
         /** @returns Identifier for this space instance. */
-        getInstanceID(): string
+        getInstanceID(): Promise<string>
 
         /** @returns Unique session identifier for the current session. */
-        getSessionID(): string
+        getSessionID(): Promise<string>
 
         /** @returns Name of the space the user is currently in. */
         getSpaceName(): Promise<string>
@@ -1008,7 +1090,7 @@ declare module 'vatom-spaces-plugins' {
          * @param options Configurable options for the raycast.
          * @returns Object(s) that have been hit by the raycast.
          */
-        raycast(options?: RaycastOptions): RaycastHit[]
+        raycast(options?: RaycastOptions): Promise<RaycastHit[]>
 
     }
 
@@ -1022,7 +1104,7 @@ declare module 'vatom-spaces-plugins' {
          * @param url URL of the item you are storing.
          * @returns Storage URL of the item you just stored, or `null` something went wrong.
          */
-        put(bucket: BucketType, path: string, url: string): Promise<string> | null
+        put(bucket: BucketType, path: string, url: string): Promise<string | null>
 
         /**
          * Gets the URL of a file in storage.
