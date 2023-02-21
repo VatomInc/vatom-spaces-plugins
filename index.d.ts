@@ -429,6 +429,9 @@ declare module 'vatom-spaces-plugins' {
         /** Called when the plugin is loaded */
         onLoad(): void
 
+        /** Called when the user has entered the space */
+        onEnter(): void
+
         /** Called when the plugin is unloaded (usually from uninstalling the plugin) */
         onUnload(): void
 
