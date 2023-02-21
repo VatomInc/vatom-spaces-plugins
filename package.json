@@ -1,6 +1,6 @@
 {
   "name": "vatom-spaces-plugins",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Provides support and utility for external plugin development for the Vatom Spaces platform",
   "main": "./index.js",
   "types": "./index.d.ts",
