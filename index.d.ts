@@ -888,6 +888,18 @@ declare module 'vatom-spaces-plugins' {
         toggleFollow(id: string): void
 
         /**
+         * Sends a click to the object matching the given identifier.
+         *
+         * **Note**: When using this method, the object that needs to be clicked
+         * should be within rendering range, otherwise the click will not be sent
+         * to that object.
+         *
+         * @param id Identifier of the object to send a click to.
+         * @returns `true` if the click was sent to the object, `false` otherwise.
+         */
+        sendClick(id: string): Promise<boolean>
+
+        /**
          * Registers the specified animations with the system.
          * @param url URL of the animations that you wish to register.
          */
