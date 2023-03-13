@@ -411,6 +411,9 @@ declare module 'vatom-spaces-plugins' {
     /** Type of icon to use in a popup */
     type PopupIcon = "info" | "success" | "question" | "error" | "warning"
 
+    /** Type of view mode */
+    type ViewMode = "swivel" | "advanced" | "first-person"
+
     /** Type of bucket to use when interfacing with storage */
     type BucketType = "space" | "server" | "user"
 
@@ -697,7 +700,7 @@ declare module 'vatom-spaces-plugins' {
          */
         postMessage(data: any): Promise<void>
 
-        /** Returns focus to the Space. */
+        /** Returns focus to the space. */
         returnFocus(): void
 
     }
@@ -975,6 +978,32 @@ declare module 'vatom-spaces-plugins' {
          */
         setOrientation(o: number, deg: boolean = false): Promise<void>
 
+        /**
+         * Gets the zoom level of the current user.
+         * @returns Zoom level of the current user.
+         */
+        getZoom(): Promise<number>
+
+        /**
+         * Sets the zoom level for the current user.
+         * @param zoom New zoom level.
+         * @returns `true` if the zoom has been successfully set, `false` otherwise.
+         */
+        setZoom(zoom: number): Promise<boolean>
+
+        /**
+         * Gets the view mode of the current user.
+         * @returns View mode of the current user.
+         */
+        getViewMode(): Promise<ViewMode>
+
+        /**
+         * Sets the view mode of the current user.
+         * @param mode New view mode to use.
+         * @returns `true` if the view mode has been set successfully, `false` otherwise.
+         */
+        setViewMode(mode: ViewMode): Promise<boolean>
+
         /** @returns Identifier of the current user */
         getID(): Promise<string>
 
@@ -1106,6 +1135,12 @@ declare module 'vatom-spaces-plugins' {
          * @returns Object(s) that have been hit by the raycast.
          */
         raycast(options?: RaycastOptions): Promise<RaycastHit[]>
+
+        /**
+         * Transports the user to the given URL.
+         * @param url URL to travel to. Can be either a full URL (e.g. `"https://www.google.com"`) or a space name (e.g. `"@space"`).
+         */
+        travelTo(url: string): Promise<void>
 
     }
 
