@@ -946,6 +946,9 @@ declare module 'vatom-spaces-plugins' {
     /** Handles the management of the user's position and appearance */
     class User {
 
+        /** @returns Position that the current user will be in when they enter the space */
+        getInitialPosition(): Promise<Vector3>
+
         /** @returns Position of the current user */
         getPosition(): Promise<Vector3>
 
