@@ -402,6 +402,16 @@ declare module 'vatom-spaces-plugins' {
         uv: Vector2
     }
 
+    /** Options relating to setting the view mode */
+    interface ViewModeOptions {
+        /** Configuration options for the given view mode. Available fields are dependent on the given view mode. */
+        config: object,
+        /** `true` to enable fullscreen mode, `false` to exit fullscreen mode. */
+        fullscreen: boolean,
+        /** `true` to request pointer lock (only supported in "first-person" view mode), `false` to exit pointer lock. */
+        pointerLock: boolean,
+    }
+
     /** Callback function for an input capture event */
     type InputCaptureCallback = (event: InputCaptureEvent) => void
 
@@ -936,6 +946,9 @@ declare module 'vatom-spaces-plugins' {
     /** Handles the management of the user's position and appearance */
     class User {
 
+        /** @returns Position that the current user will be in when they enter the space */
+        getInitialPosition(): Promise<Vector3>
+
         /** @returns Position of the current user */
         getPosition(): Promise<Vector3>
 
@@ -966,16 +979,30 @@ declare module 'vatom-spaces-plugins' {
         /**
          * Gets the orientation of the current user.
          * @param deg `true` to return the orientation in degrees, `false` to return in radians. Default is `false`.
-         * @returns Orientation of the current user.
+         * @returns Orientation in radians (or degrees if `deg === true`).
          */
         getOrientation(deg: boolean = false): Promise<number>
 
         /**
          * Sets the orientation of the current user.
-         * @param o Orientation to set for the current user.
+         * @param orient Orientation to set for the current user.
          * @param deg `true` to indicate that the given orientation is in degrees, `false` to indicate that it is in radians. Default is `false`.
          */
-        setOrientation(o: number, deg: boolean = false): void
+        setOrientation(orient: number, deg: boolean = false): void
+
+        /**
+         * Gets the tilt value of the current user.
+         * @param deg `true` to return the tilt in degrees, `false` to return in radians. Default is `false`.
+         * @returns Tilt value in radians (or degrees if `deg === true`).
+         */
+        getTilt(deg: boolean = false): Promise<number>
+
+        /**
+         * Sets current user tilt.
+         * @param tilt Tilt value to set for the user.
+         * @param deg `true` to indicate that the given tilt is in degrees, `false` to indicate that it is in radians. Default is `false`.
+         */
+        setTilt(tilt: number, deg: boolean = false): void
 
         /**
          * Gets the zoom level of the current user.
@@ -999,9 +1026,10 @@ declare module 'vatom-spaces-plugins' {
         /**
          * Sets the view mode of the current user.
          * @param mode New view mode to use.
+         * @param options Options relating to the view mode.
          * @returns `true` if the view mode has been set successfully, `false` otherwise.
          */
-        setViewMode(mode: ViewMode): Promise<boolean>
+        setViewMode(mode: ViewMode, options?: ViewModeOptions): Promise<boolean>
 
         /** @returns Identifier of the current user */
         getID(): Promise<string>
