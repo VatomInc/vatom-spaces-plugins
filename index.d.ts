@@ -1202,6 +1202,12 @@ declare module 'vatom-spaces-plugins' {
         onClick(event: ComponentClickEvent): void
 
         /**
+         * Called when a button has been clicked in the component settings.
+         * @param id Identifier of the button that has been clicked.
+         */
+        onAction(id: string): void
+
+        /**
          * Gets a component configuration field.
          * @param id Identifier of the field to get the value for.
          * @returns Value of the field matching the given identifier.
