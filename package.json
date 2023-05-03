@@ -10,18 +10,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/VatomInc/external-plugin-declaration.git"
+    "url": "git+https://github.com/VatomInc/vatom-spaces-plugins.git"
   },
   "keywords": [
     "declaration",
-    "intellisense"
+    "intellisense",
+    "vatom",
+    "spaces",
+    "vatom spaces",
+    "metaverse",
+    "plugin"
   ],
-  "author": "Liron Toledo",
+  "author": "Vatom Inc",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/VatomInc/external-plugin-declaration/issues"
+    "url": "https://github.com/VatomInc/vatom-spaces-plugins/issues"
   },
-  "homepage": "https://github.com/VatomInc/external-plugin-declaration#readme",
+  "homepage": "https://github.com/VatomInc/vatom-spaces-plugins#readme",
   "devDependencies": {
     "typescript": "^4.9.5"
   }
