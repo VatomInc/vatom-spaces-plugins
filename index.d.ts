@@ -220,7 +220,7 @@ declare module 'vatom-spaces-plugins' {
         /** Name of this setting. */
         name: string,
         /** Type of this setting. */
-        type: "label" | "section" | "collapse-section" | "select" | "select-item" | "file" | "color" | "checkbox" | "button" | "field-button" | "half-button" | "number" | "text" | "slider" | "vector2" | "vector3" | "textarea",
+        type: ComponentSettingsType,
         /** Value of the setting. Do not specify if users should be able to change the value. */
         value: any,
         /** Description of what the setting does. */
@@ -420,6 +420,9 @@ declare module 'vatom-spaces-plugins' {
 
     /** Type of icon to use in a popup */
     type PopupIcon = "info" | "success" | "question" | "error" | "warning"
+
+    /** Type of component setting */
+    type ComponentSettingsType = "label" | "section" | "collapse-section" | "two-stack" | "vertical-space" | "select" | "select-item" | "file" | "color" | "checkbox" | "button" | "field-button" | "half-button" | "number" | "text" | "slider" | "bind-key" | "vector2" | "vector3" | "textarea"
 
     /** Type of view mode */
     type ViewMode = "swivel" | "advanced" | "first-person"
