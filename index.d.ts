@@ -240,7 +240,19 @@ declare module 'vatom-spaces-plugins' {
         /** When the type is `"slider"`, `true` shows the current value, `false` otherwise. Default is `false`. */
         showValue?: boolean,
         /** When the type is `"slider"`, this represents the number of decimal places to use for the value. Default is 0. */
-        precision?: number
+        precision?: number,
+        /** When the type is `"vertical-space"`, this represents the height of the space (in pixels). Default is 5. */
+        height?: number,
+        /** When the type is `"two-stack"`, this represents the height between the two elements. Default is 5. */
+        heightBetween?: number,
+        /** When the type is `"two-stack"`, this represents the first element to show. */
+        first?: ComponentSettings,
+        /** When the type is `"two-stack"`, this represents the second element to show. */
+        second?: ComponentSettings,
+        /** When the type is `"button"`, this is called when the button is clicked. */
+        onClick?: () => void,
+        /** When the type is `"button"`, this is called when the button is clicked. It is an alias for `onClick`. */
+        action?: () => void,
     }
 
     /** Information regarding a component */
@@ -1130,7 +1142,7 @@ declare module 'vatom-spaces-plugins' {
          * @param buttonText Text of the button shown on the shut down screen. Default is "Try again".
          * @param buttonAction Action you wish the shut down screen button to take when clicked. Default is `e => location.reload()`.
          */
-        showShutDownScreen(message: string, title: string, buttonText?: string, buttonAction?: (evt) => void): void
+        showShutDownScreen(message: string, title: string, buttonText?: string, buttonAction?: (evt: Event) => void): void
 
         /** Shows the selection screen for a user avatar. */
         showAvatarSelectPopup(): void
