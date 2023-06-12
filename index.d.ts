@@ -1173,7 +1173,7 @@ declare module 'vatom-spaces-plugins' {
         getSpaceName(): Promise<string>
 
         /** @returns Default avatar in this space if set, `null` otherwise. */
-        getDefaultAvatar(): Promise<AvatarData>
+        getDefaultAvatar(): Promise<AvatarData | null>
 
         /**
          * Sets the default avatar for this space.
