@@ -346,10 +346,11 @@ declare module 'vatom-spaces-plugins' {
         name: string,
         /** Type of the avatar. */
         type: string,
-        /** URL to the avatar model. */
-        modelURL?: string,
         /** Properties for the avatar. */
-        properties?: {}
+        properties: {
+            /** URL to the actual avatar model. */
+            url: string,
+        }
     }
 
     /** Data related to a single user */
@@ -1170,6 +1171,15 @@ declare module 'vatom-spaces-plugins' {
 
         /** @returns Name of the space the user is currently in. */
         getSpaceName(): Promise<string>
+
+        /** @returns Default avatar in this space if set, `null` otherwise. */
+        getDefaultAvatar(): Promise<AvatarData>
+
+        /**
+         * Sets the default avatar for this space.
+         * @param data Avatar data to use as the default space avatar.
+         */
+        setDefaultAvatar(data: AvatarData): Promise<void>
 
         /**
          * Performs a raycast and returns the hit object(s).
