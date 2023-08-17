@@ -1056,6 +1056,15 @@ declare module 'vatom-spaces-plugins' {
         /** @returns `true` if this user is an admin in the space, `false` otherwise */
         isAdmin(): Promise<boolean>
 
+        /** @returns `true` if this user is a super admin in the space, `false` otherwise */
+        isSuperAdmin(): Promise<boolean>
+
+        /** @returns `true` if this user is the owner of this space, `false` otherwise */
+        isOwner(): Promise<boolean>
+
+        /** @returns `true` if this user is currently muted, `false` otherwise */
+        isMuted(): Promise<boolean>
+
         /** @returns `true` if your user is following another user or object, `false` otherwise */
         getFollow(): Promise<boolean>
 
