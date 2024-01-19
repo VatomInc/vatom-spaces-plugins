@@ -368,10 +368,11 @@ declare module 'vatom-spaces-plugins' {
         name: string,
         /** Type of the avatar. */
         type: string,
-        /** URL to the avatar model. */
-        modelURL?: string,
         /** Properties for the avatar. */
-        properties?: {}
+        properties: {
+            /** URL to the actual avatar model. */
+            url: string,
+        }
     }
 
     /** Data related to a single user */
@@ -1187,10 +1188,10 @@ declare module 'vatom-spaces-plugins' {
         /** @returns `true` if this user is an admin in the space, `false` otherwise */
         isAdmin(): Promise<boolean>
 
-        /** @returns `true` if this user is a super admin in this space, `false` otherwise */
+        /** @returns `true` if this user is a super admin in the space, `false` otherwise */
         isSuperAdmin(): Promise<boolean>
 
-        /** @returns `true` if this user is the owner of this space, `false` otherwise */
+        /** @returns `true` if this user is the owner of the space, `false` otherwise */
         isOwner(): Promise<boolean>
 
         /** @returns `true` if this user is currently muted, `false` otherwise */
