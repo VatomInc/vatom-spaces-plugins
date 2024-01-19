@@ -35,6 +35,16 @@ declare module 'vatom-spaces-plugins' {
         version: number
     }
 
+    /** Response from the payments API */
+    interface PaymentResponse {
+        /** Date, in milliseconds, of the last update */
+        lastUpdate: number,
+        /** `true` if the payment method is valid, `false` otherwise */
+        isValid: boolean,
+        /** Status of the payment details */
+        status: string
+    }
+
     /** Event that contains information from an input capture */
     interface InputCaptureEvent {
         /** Width of the current window. */
@@ -211,6 +221,18 @@ declare module 'vatom-spaces-plugins' {
         objectID: string,
         /** Properties for the object that this component is attached to. */
         fields: MapItemProperties
+    }
+
+    /** Vertex point for an object */
+    interface VertexPoint {
+        /** Identifier of the vertex point */
+        id: string,
+        /** Name of the vertext point */
+        name: string,
+        /** List of vertices */
+        vertices: Vector3[],
+        /** List of indices */
+        indices: number[]
     }
 
     /** Settings for a component */
@@ -406,6 +428,40 @@ declare module 'vatom-spaces-plugins' {
         collision: boolean
     }
 
+    /** Options when capturing an image inside the space */
+    interface ImageCaptureOptions {
+        /** Width of the image to capture. If not specified, the current viewport width is used. */
+        width: number,
+        /** Height of the image to capture. If not specified, the current viewport height is used. */
+        height: number,
+        /** Format of the image to capture. Default is "image/png". */
+        format: "image/png" | "image/jpeg",
+        /** Only applicable when format is "image/jpeg". Quality of the image to capture, from 0 (lowest) to 1 (highest). Default is 0.9 */
+        quality: number,
+        /** `true` to hide the name tags, `false` otherwise. Default is `false`. */
+        hideNameTags: boolean,
+        /** Optional. Position to move the camera to. */
+        cameraPosition?: Vector3,
+        /** Optional. Only applicable if `cameraPosition` is set. Position to have the camera look at. */
+        cameraTarget?: Vector3,
+    }
+
+    /** Storage item from a bucket */
+    interface StorageItem {
+        /** Name of the item. */
+        name: string,
+        /** Size of the item, in bytes. */
+        size: number,
+        /** MIME type of the item. */
+        mimeType: string,
+        /** Date that the item was created. */
+        dateCreated: Date,
+        /** Date that the item was modified. */
+        dateModified: Date,
+        /** URL to the item. */
+        url: string
+    }
+
     /** Event that contains information from a component being clicked */
     interface ComponentClickEvent {
         /** Point at which the click hit, in world space. */
@@ -591,6 +647,28 @@ declare module 'vatom-spaces-plugins' {
         /** Stops the current input capture, if any. */
         stopInputCapture(): void
 
+        /**
+         * Starts a paid plugin session.
+         * @param plugin Details of the plugin to start a session for.
+         */
+        startPaidSession(plugin: PluginDetails): Promise<string>
+
+        /**
+         * Stops a paid plugin session.
+         * @param sessionID Identifier of the session to stop.
+         */
+        stopPaidSession(sessionID: string): Promise<void>
+
+        /** @returns Payment details of the current space */
+        checkPayment(): Promise<PaymentResponse>
+
+        /**
+         * Opens the given URL in a new tab.
+         * @param url URL to open.
+         * @param features Optional features to apply when opening the URL.
+         */
+        openURL(url: string, features: string = ''): void
+
     }
 
     /** Handles interaction with the audio system */
@@ -664,6 +742,14 @@ declare module 'vatom-spaces-plugins' {
          * @param icon Icon to show. Default is "info".
          */
         alert(text: string, title: string, icon: PopupIcon): Promise<void>
+
+        /**
+         * Displays a confirmation message in a popup.
+         * @param text Text to display.
+         * @param title Title of message. Default is the name of the plugin.
+         * @param icon Icon to show. Default is "question".
+         */
+        confirm(text: string, title: string, icon: PopupIcon): Promise<boolean>
 
         /**
          * Asks the user for text input.
@@ -762,12 +848,34 @@ declare module 'vatom-spaces-plugins' {
     class Objects {
 
         /**
+         * Animates an object.
+         * @param options Options relating to the animation of the object.
+         */
+        animate(options: AnimateOptions): Promise<void>
+
+        /**
          * Creates a new object. Will be created as a client-only object, unless
          * `clientOnly: false` is specified in the options.
          * @param options Options relating to the object to create.
          * @returns Identifier of the object that has been created.
          */
         create(options: MapItemProperties): Promise<string>
+
+        /**
+         * Updates an existing object.
+         * @param id Identifier of the object to update.
+         * @param options Properties of the object to update.
+         * @param localOnly `true` to only update the local values of fields. NOTE: If the remote object is updated, it will be overwritten again.
+         */
+        update(id: string, options: MapItemProperties, localOnly: boolean = false): Promise<void>
+
+        /**
+         * Removes an object.
+         * @param id Identifier of the object to remove.
+         * @param options Options relating to the removal of the object.
+         * @param options.clientOnly `true` if we only want to remove this object for this user, `false` if we want to remove it from the server. Default is `false`.
+         */
+        remove(id: string, options: { clientOnly: boolean = false }): void
 
         /**
          * Creates a status item that appears above a user's avatar. Will always be
@@ -788,14 +896,6 @@ declare module 'vatom-spaces-plugins' {
         createTopStatusIcon(options: StatusOptions, properties: MapItemProperties): Promise<string | null>
 
         /**
-         * Updates an existing object.
-         * @param id Identifier of the object to update.
-         * @param options Properties of the object to update.
-         * @param localOnly `true` to only update the local values of fields. NOTE: If the remote object is updated, it will be overwritten again.
-         */
-        update(id: string, options: MapItemProperties, localOnly: boolean = false): Promise<void>
-
-        /**
          * Updates an existing status item.
          * @param userID Identifier of the user to update the status item for.
          * @param itemID Identifier of the status item to update.
@@ -812,14 +912,6 @@ declare module 'vatom-spaces-plugins' {
         updateTopStatusIcon(userID: string, itemID: string, properties: MapItemProperties): void
 
         /**
-         * Removes an object.
-         * @param id Identifier of the object to remove.
-         * @param options Options relating to the removal of the object.
-         * @param options.clientOnly `true` if we only want to remove this object for this user, `false` if we want to remove it from the server. Default is `false`.
-         */
-        remove(id: string, options: { clientOnly: boolean = false }): void
-
-        /**
          * Removes the status item that matches the given identifier.
          * @param userID Identifier of the user to remove the status item from.
          * @param itemID Identifier of the status item to remove.
@@ -832,12 +924,6 @@ declare module 'vatom-spaces-plugins' {
          * @param itemID Identifier of the top status icon to remove.
          */
         removeTopStatusIcon(userID: string, itemID: string): void
-
-        /**
-         * Animates an object.
-         * @param options Options relating to the animation of the object.
-         */
-        animate(options: AnimateOptions): Promise<void>
 
         /**
          * Converts from euler angles (in radians) to quaternion.
@@ -861,6 +947,13 @@ declare module 'vatom-spaces-plugins' {
         get(id: string): Promise<MapItemProperties>
 
         /**
+         * Gets the animations of an object as a JSON string.
+         * @param id Identifier of the object to get animations for.
+         * @returns JSON string of all animations associated with this object.
+         */
+        getAnimations(id: string): Promise<string>
+
+        /**
          * Gets the rotation, as a quaternion, for the given object.
          * @param id Identifier of the object to get the rotation for.
          * @returns Rotation, as a quaternion, for the given object.
@@ -878,6 +971,13 @@ declare module 'vatom-spaces-plugins' {
         getComponentInstances(): ComponentInstance[]
 
         /**
+         * Finds the mesh vertex points for the given object.
+         * @param objectID Identifier of the object to get the mesh vertex points for.
+         * @returns Mesh vertex points for the given object, or `null` if no object is found.
+         */
+        getVertices(objectID: string): Promise<VertexPoint[] | null>
+
+        /**
          * Fetches all the objects within a radius.
          * @param x Position in the x axis.
          * @param y Position in the y axis.
@@ -885,13 +985,6 @@ declare module 'vatom-spaces-plugins' {
          * @returns List of item properties that are within the given radius.
          */
         fetchInRadius(x: number, y: number, radius: number): Promise<MapItemProperties[]>
-
-        /**
-         * Gets the animations of an object as a JSON string.
-         * @param id Identifier of the object to get animations for.
-         * @returns JSON string of all animations associated with this object.
-         */
-        getAnimations(id: string): Promise<string>
 
         /**
          * Register a component so that it can be attached to objects.
@@ -931,6 +1024,17 @@ declare module 'vatom-spaces-plugins' {
          * @param url URL of the animations that you wish to register.
          */
         registerAnimations(url: string): Promise<void>
+
+        /**
+         * Performs an action on the requested component.
+         * @param objectID Identifier of the object to perform the component action on.
+         * @param pluginID Identifier of the plugin that the component belongs to.
+         * @param componentID Identifier of the component to perform the action on.
+         * @param action Action to perform.
+         * @param data Data to pass to the action.
+         * @returns Response from the action.
+         */
+        performComponentAction(objectID: string, pluginID: string, componentID: string, action: string, data: any): Promise<any>
 
     }
 
@@ -1006,6 +1110,34 @@ declare module 'vatom-spaces-plugins' {
         setOrientation(orient: number, deg: boolean = false): void
 
         /**
+         * Gets the camera orientation of the current user.
+         * @param deg `true` to return the camera orientation in degrees, `false` to return in radians. Default is `false`.
+         * @returns Camera orientation in radians (or degrees if `deg === true`).
+         */
+        getCameraOrientation(deg: boolean = false): Promise<number>
+
+        /**
+         * Sets the camera orientation of the current user.
+         * @param orient Camera orientation to set for the current user.
+         * @param deg `true` to indicate that the given camera orientation is in degrees, `false` to indicate that it is in radians. Default is `false`.
+         */
+        setCameraOrientation(orient: number, deg: boolean = false): void
+
+        /**
+         * Gets the avatar orientation of the current user.
+         * @param deg `true` to return the avatar orientation in degrees, `false` to return in radians. Default is `false`.
+         * @returns Avatar orientation in radians (or degrees if `deg === true`).
+         */
+        getAvatarOrientation(deg: boolean = false): Promise<number>
+
+        /**
+         * Sets the avatar orientation of the current user.
+         * @param orient Avatar orientation to set for the current user.
+         * @param deg `true` to indicate that the given avatar orientation is in degrees, `false` to indicate that it is in radians. Default is `false`.
+         */
+        setAvatarOrientation(orient: number, deg: boolean = false): void
+
+        /**
          * Gets the tilt value of the current user.
          * @param deg `true` to return the tilt in degrees, `false` to return in radians. Default is `false`.
          * @returns Tilt value in radians (or degrees if `deg === true`).
@@ -1054,6 +1186,15 @@ declare module 'vatom-spaces-plugins' {
 
         /** @returns `true` if this user is an admin in the space, `false` otherwise */
         isAdmin(): Promise<boolean>
+
+        /** @returns `true` if this user is a super admin in this space, `false` otherwise */
+        isSuperAdmin(): Promise<boolean>
+
+        /** @returns `true` if this user is the owner of this space, `false` otherwise */
+        isOwner(): Promise<boolean>
+
+        /** @returns `true` if this user is currently muted, `false` otherwise */
+        isMuted(): Promise<boolean>
 
         /** @returns `true` if your user is following another user or object, `false` otherwise */
         getFollow(): Promise<boolean>
@@ -1168,8 +1309,14 @@ declare module 'vatom-spaces-plugins' {
         /** @returns Unique session identifier for the current session. */
         getSessionID(): Promise<string>
 
-        /** @returns Name of the space the user is currently in. */
-        getSpaceName(): Promise<string>
+        /** @returns Default avatar for this space, or `null` if there is none. */
+        getDefaultAvatar(): Promise<AvatarData | null>
+
+        /**
+         * Sets the default avatar for this space.
+         * @param data Avatar to set as the space default.
+         */
+        setDefaultAvatar(data: AvatarData): void
 
         /**
          * Performs a raycast and returns the hit object(s).
@@ -1178,16 +1325,41 @@ declare module 'vatom-spaces-plugins' {
          */
         raycast(options?: RaycastOptions): Promise<RaycastHit[]>
 
+        /** @returns Name of the space the user is currently in. */
+        getSpaceName(): Promise<string>
+
         /**
          * Transports the user to the given URL.
          * @param url URL to travel to. Can be either a full URL (e.g. `"https://www.google.com"`) or a space name (e.g. `"@space"`).
          */
         travelTo(url: string): Promise<void>
 
+        /**
+         * Captures an image of the current space.
+         * @param options Options used to capture the image.
+         * @returns Data URI containing the image.
+         */
+        captureImage(options: ImageCaptureOptions): Promise<string>
+
     }
 
     /** Handles interaction with the storage system */
     class StorageComponent {
+
+        /**
+         * Downloads a file to the user's device.
+         * @param url URL of the file to download.
+         * @param fileName Name of the file to download.
+         */
+        downloadFile(url: string, fileName: string): void
+
+        /**
+         * Gets the URL of a file in storage.
+         * @param bucket Storage bucket which the item belongs to.
+         * @param path Path of item inside storage.
+         * @returns Storage URL of the item found, or `null` if nothing is found.
+         */
+        getURL(bucket: BucketType, path: string): Promise<string>
 
         /**
          * Puts a file into storage and returns the URL to the item.
@@ -1199,12 +1371,18 @@ declare module 'vatom-spaces-plugins' {
         put(bucket: BucketType, path: string, url: string): Promise<string | null>
 
         /**
-         * Gets the URL of a file in storage.
-         * @param bucket Storage bucket which the item belongs to.
-         * @param path Path of item inside storage.
-         * @returns Storage URL of the item found, or `null` if nothing is found.
+         * Lists files in the given folder.
+         * @param bucket Storage bucket to list files from.
+         * @param path Path inside the bucket to list files from.
          */
-        getURL(bucket: BucketType, path: string): Promise<string>
+        list(bucket: BucketType, path: string): Promise<StorageItem[]>
+
+        /**
+         * Deletes an item from the storage bucket.
+         * @param bucket Storage bucket to delete item from.
+         * @param path Path to item inside storage storage bucket.
+         */
+        delete(bucket: BucketType, path: string): Promise<void>
 
     }
 
